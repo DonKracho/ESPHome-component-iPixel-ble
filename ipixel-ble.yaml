@@ -29,7 +29,8 @@ wifi:
   password: !secret wifi_password
   
 external_components:
-  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices
+#  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices/components
+  - source: D:\ESPHome-external-component-for-iPixel-ble-devices\components
     refresh: 0s
     components: [ipixel_ble]
     
@@ -48,6 +49,8 @@ output:
 ipixel_ble:
   id: ipixel_id
   ble_client_id: ble_client_id
+  display_width: 32   # optional defaults to 32
+  display_height: 32  # optional defaults to 32
 
 # rgb light dummy to set on/off, brightness, color. Uses flash transition lenth parameter to set an effect
 light:

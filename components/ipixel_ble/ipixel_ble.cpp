@@ -388,6 +388,11 @@ void IPixelBLE::on_font_flag_number(float value) {
       break;
     case 2:
     case 4:
+      if (state_.mDisplayHeight < 32) {
+        // avoid display crashes
+        ESP_LOGE(TAG, "font height 32px is larger than display height!");
+        return;
+      }
       state_.mFontWidth = 16;
       state_.mFontHeight = 32;
       break;
