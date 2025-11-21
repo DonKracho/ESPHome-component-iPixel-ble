@@ -60,17 +60,17 @@ My credits go to:
 - **[lucagoc/pypixelcolor](https://github.com/lucagoc/pypixelcolor)**  
   A Python command line solution, without HA integration.
   
-- **[lucagoc/iPixel-ESPHome](https://github.com/lucagoc/iPixel-ESPHome)**
+- **[lucagoc/iPixel-ESPHome](https://github.com/lucagoc/iPixel-ESPHome)**  
   An ESPHome integration in progress using lambda functions supporting a few commands right now.
   
-- **[ToBiDi0410/iPixel-ESP32](https://github.com/ToBiDi0410/iPixel-ESP32)**
+- **[ToBiDi0410/iPixel-ESP32](https://github.com/ToBiDi0410/iPixel-ESP32)**  
   An ESP32 S3 Port using a REST API supporting all stuff known right now.
   Unfortunately some comands did fail with my display.
 
-- **[Erriez/ErriezCRC32](https://github.com/Erriez/ErriezCRC32)**
+- **[Erriez/ErriezCRC32](https://github.com/Erriez/ErriezCRC32)**  
   A small and efficient CRC32 checksum calculator. I used my forked version because it is restricted for arduino use only. There are no dependencies to the arduino framework. I just had to modify the lirary.json.
 
-- **[spacerace/romfont](https://github.com/spacerace/romfont)**
+- **[spacerace/romfont](https://github.com/spacerace/romfont)**  
   The MORSEKP800_8x16 font is used for caracter bitmap rendering.
 
 - **[warehog/esphome-diesel-heater-ble](https://github.com/warehog/esphome-diesel-heater-ble)**  
@@ -122,5 +122,6 @@ The BLE stack occupies a significant amount of flash memory. Combined with sever
   
 - **and last but not least: implementing a display component**  
   This will enable to do some graphical stuff but will definitely require a device like the ESP32 S3 with more flash memory. Be aware that sending a huge amount of data via BLE takes it's time.
+
 
 
