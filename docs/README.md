@@ -89,7 +89,7 @@ script:
     target:
       entity_id: light.ipixel_ble_display
   alias: iPixel Default
-  description: 'set the LED pixel bord defaults'
+  description: 'set the LED pixel board defaults'
 ```
 Example for displaying a text message:
 ```
@@ -121,5 +121,6 @@ script:
       effect: Message
       brightness_pct: 100
   alias: iPixel send and display text
-  description: 'display text on the LED pixel bord'
+  description: 'display text on the LED pixel board'
 ```
+
