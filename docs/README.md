@@ -30,23 +30,23 @@ When this external component is compiled and uploaded to the esp32 module you ho
   text input for the Message effect
 
 - **Display** (rgb light)   
-  First of all you can switch on and off the display.
-  Cliking on the text "Display" will open the rgb light diapog (see next chapter)
+  First of all you can switch on and off the display;)
+  Cliking on the text "Display" will open the rgb light dialog (see next chapter)
 
   Effects:
-  - **None** Calls the clear() method which shows the inintial image of the device  
-  - **Time** Clock display
-  - **Time & Date** Alternating Clock/Date display 
-  - **Message** Text display
-  - **Load PNG** displays an internal stored 32x32 image 
-  - **Load GIF** no function (work in progress)
-  - **Fill Color** fills the entire display with tHte current Color
-  - **Fill Rainbow** loads an image with diagonal rainbow colors 
-  - **Random Pixel** calls setPixel() wit random coordinates and colors every 300ms 
-  - **Alarn** changes Brightness in a falling ramp every 300ms  
+  - **None** calls the clear() method which shows the inintial image of the device  
+  - **Time** displays an internal clock frame  
+  - **Time & Date** display alternating clock and date  
+  - **Message** display text  
+  - **Load PNG** displays an internal stored 32x32 image  
+  - **Load GIF** no function (work in progress)  
+  - **Fill Color** fills the entire display with the current color  
+  - **Fill Rainbow** loads an image with diagonal rainbow colors  
+  - **Random Pixel** calls the setPixel() method with random coordinates and colors every 300ms  
+  - **Alarm** changes brightness in a falling ramp every 300ms  
 
 - **Font Flag** (number 1-4, default: 0)  
-  exlusive for the message display effect
+  exlusive for the Message effect
   
   0:  8x16 Font  
   0:  8x16 Font   
@@ -56,7 +56,7 @@ When this external component is compiled and uploaded to the esp32 module you ho
   4: 16x32 Font (encoded with width and height parameters per char, not compatible with my display)   
 
 - **Text Mode** (number 0-4, default: 0)
-  exlusive for the message display effect
+  exlusive for the Message effect
   
   0: text color taken from the rgb light color   
   1: Text color white   
@@ -69,11 +69,9 @@ When this external component is compiled and uploaded to the esp32 module you ho
  
 ### The display rgb light component explained
 
-Cklick on the text "Display" of the RGB light component to open dtetailed settings,
+Cklick on the text "Display" of the RGB light component to open detailed settings. Here you can set brightness, color and effects.
 
 ![RGB light dialog](light_view.png)
-
-Here you can set brightness, color and effects.
 
 ![RGB light dialog](effect_view.png)
 
@@ -125,7 +123,3 @@ script:
   alias: iPixel send and display text
   description: 'display text on the LED pixel bord'
 ```
-
-
-
-
