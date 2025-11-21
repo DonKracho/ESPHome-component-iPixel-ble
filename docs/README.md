@@ -79,6 +79,51 @@ Here you can set brightness, color and effects.
 
 ### HomeAssistant scripting
 
-
+Example for setting the LED pixel bord to default:
+```
+script:
+  sequence:
+  - action: light.turn_on
+    metadata: {}
+    data:
+      brightness_pct: 20
+      effect: Time
+    target:
+      entity_id: light.ipixel_ble_display
+  alias: iPixel Default
+  description: 'set the LED pixel bord defaults'
+```
+Example for displaying a text message:
+```
+script:
+  sequence:
+  - action: light.turn_on
+    target:
+      entity_id: light.ipixel_ble_display
+    data:
+      rgb_color:
+      - 255
+      - 255
+      - 0
+  - device_id: 647c20e6b4026448d8b80348af256dcb (ipixel_id)
+    domain: number
+    entity_id: 2b63b06c32b6f7e017a7a618fa4e00b8  (font_mode_id)
+    type: set_value
+    value: 2
+  - action: text.set_value
+    metadata: {}
+    data:
+      value: This is a script message from Homeassistant
+    target:
+      entity_id: text.ipixel_ble_data
+  - action: light.turn_on
+    target:
+      entity_id: light.ipixel_ble_display
+    data:
+      effect: Message
+      brightness_pct: 100
+  alias: iPixel send and display text
+  description: 'display text on the LED pixel bord'
+```
 
 
