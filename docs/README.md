@@ -11,13 +11,13 @@ When this external component is compiled and uploaded to the esp32 module you ho
 - **Animation Mode** (number 0-9, default: 1)   
   exlusive for the Message effect. Animation Speed does apply.
   
-  0: text is displayed in pages 
-  1: text scrolling from right to left 
-  2: text scrolling from left to right 
-  3: text scrolling from bottom to top 
-  4: text scrolling from top to bottom
-  5: text flashing 
-  6: text with brightnes rising
+  0: text is displayed in pages   
+  1: text scrolling from right to left   
+  2: text scrolling from left to right   
+  3: text scrolling from bottom to top   
+  4: text scrolling from top to bottom  
+  5: text flashing   
+  6: text with brightnes rising  
 
 - **Animation Speed** (number 1-100, step: 5, default: 100)   
   exlusive for the Message effect
@@ -48,21 +48,21 @@ When this external component is compiled and uploaded to the esp32 module you ho
 - **Font Flag** (number 1-4, default: 0)  
   exlusive for the message display effect
   
-  0:  8x16 Font
-  0:  8x16 Font
-  1: 16x16 Font
-  2: 16x32 Font
-  3:  8x16 Font (encoded with width and height parameters per char, not compatible with my display)
-  4: 16x32 Font (encoded with width and height parameters per char, not compatible with my display)
+  0:  8x16 Font  
+  0:  8x16 Font   
+  1: 16x16 Font   
+  2: 16x32 Font   
+  3:  8x16 Font (encoded with width and height parameters per char, not compatible with my display)   
+  4: 16x32 Font (encoded with width and height parameters per char, not compatible with my display)   
 
 - **Text Mode** (number 0-4, default: 0)
   exlusive for the message display effect
   
-  0: text color taken from the rgb light color
-  1: Text color white
-  2: top to bottom rainbow effect (yellow to red)
-  3: top to bottom rainbow effect (light blue to white)
-  4: top to bottom rainbow effect (blue to yellow)
+  0: text color taken from the rgb light color   
+  1: Text color white   
+  2: top to bottom rainbow effect (yellow to red)   
+  3: top to bottom rainbow effect (light blue to white)   
+  4: top to bottom rainbow effect (blue to yellow)   
   
 - **Update Time**
   Usually the internal clock of the display gets synchronized every hour by this device based on the homaassistant time (requires ipixel-ble.yaml time entry at the end of the file). If, for what reasons ever, the time is not up to date press this button. If it is still not correct soemting is wrong with your Homeassistant time. 
@@ -78,4 +78,5 @@ Here you can set brightness, color and effects.
 ![RGB light dialog](effect_view.png)
 
 # HomeAssistant scripting
+
 
