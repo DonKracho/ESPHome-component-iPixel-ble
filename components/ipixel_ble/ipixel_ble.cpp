@@ -12,7 +12,7 @@
 #ifdef USE_ESP32
 
 namespace esphome {
-namespace display {
+namespace ipixel_ble {
 
 const char *TAG = "ipixel_ble";
 
@@ -30,12 +30,17 @@ void IPixelBLE::loop() {
       on_update_time_button_press();  // trigger time update
     }
     
-    if (this->last_animation_ + 300 < tick) {
-      this->last_animation_ = tick;
-      if (state_.mPowerState) {
+    if (state_.mPowerState) {
+      if (this->last_animation_ + 300 < tick) {
+        this->last_animation_ = tick;
         random_pixel_effect(); // update the animated effect whie it is selected
         alarm_effect();
       } 
+
+      if (this->last_update_ + 5000 < tick) {
+        this->last_update_ = tick;
+        load_gif_effect();  // loads a entire RGB frame, do not stress the BLE connection to much
+      }
     }
     queueTick();
   }
@@ -48,7 +53,7 @@ void IPixelBLE::update() {
   //ESP_LOGD(TAG, "display update called");
 }
 
-void IPixelBLE::draw_pixel_at(int x, int y, Color color) {
+void IPixelBLE::draw_absolute_pixel_internal(int x, int y, Color color) {
   // take care to ignore x,y coordinates outside the avaialble framebuffer
   if (x >= 0 && x < state_.mDisplayWidth && y >= 0 && y < state_.mDisplayHeight)
   {
@@ -485,17 +490,7 @@ void IPixelBLE::load_png_effect() {
 
 void IPixelBLE::load_gif_effect() {
   if (state_.mEffect == LoadGIF) {
-    // to test some graphic functions dwap a smiley
-    filled_circle(15, 15, 14, Color(255, 255, 0));
-    line(8, 20, 24, 20, Color(255, 0, 0));
-    line(10, 21, 22, 21, Color(255, 0, 0));
-    line(12, 22, 20, 22, Color(255, 0, 0));
-    rectangle( 0, 0, 32, 32, Color(0, 0, 255));
-    filled_circle(9, 9, 5, Color(255, 255, 255));
-    filled_circle(22, 9, 5, Color(255, 255, 255));
-    filled_circle(10, 10, 2, Color(0, 0, 0));
-    filled_circle(23, 10, 2, Color(0, 0, 0));
-
+    do_update_(); // call display lambda writer
     queuePush( iPixelCommads::sendPNG( state_.framebuffer_ ) );
   }
 }
@@ -561,7 +556,7 @@ void IPixelBLE::alarm_effect() {
   }
 }
 
-}  // namespace display
+}  // namespace ipixel_ble
 }  // namespace esphome
 
 #endif

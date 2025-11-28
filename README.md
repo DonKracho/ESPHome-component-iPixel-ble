@@ -120,9 +120,6 @@ The BLE stack occupies a significant amount of flash memory. Combined with sever
 
 - **reverse engeneering of the play program feature**  
   A nice feature to queue image and text effects.
-  
-- **and last but not least: implementing a display component**  
-  This will enable to do some graphical stuff but will definitely require a device like the ESP32 S3 with more flash memory. Be aware that sending a huge amount of data via BLE takes it's time.
 
 
 

@@ -7,7 +7,7 @@ CODEOWNERS = ["@donkracho"]
 
 CONF_IPIXEL_BLE = "ipixel_ble"
 
-ipixel_ble_ns = cg.esphome_ns.namespace("display")
+ipixel_ble_ns = cg.esphome_ns.namespace("ipixel_ble")
 IPixelBLE = ipixel_ble_ns.class_("IPixelBLE", cg.Component, display.DisplayBuffer, light.LightOutput, ble_client.BLEClientNode)
 
 CONFIG_SCHEMA = (

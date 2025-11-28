@@ -5,7 +5,7 @@
 #include <esp_gattc_api.h>
 #include <algorithm>
 #include <iterator>
-#include "esphome/components/display/display.h"
+#include "esphome/components/display/display_buffer.h"
 #include "esphome/components/ble_client/ble_client.h"
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
 #include "esphome/components/light/light_output.h"
@@ -20,9 +20,9 @@
 #include "state.h"
 
 namespace esphome {
-namespace display {
+namespace ipixel_ble {
 
-class IPixelBLE :  public display::Display, public light::LightOutput, public ble_client::BLEClientNode, public text::Text {
+class IPixelBLE :  public display::DisplayBuffer, public light::LightOutput, public ble_client::BLEClientNode, public text::Text {
  public:
   IPixelBLE() {}
 
@@ -31,10 +31,9 @@ class IPixelBLE :  public display::Display, public light::LightOutput, public bl
   
   // display
   void update() override;
-  void draw_pixel_at(int x, int y, Color color) override;
   int get_width_internal() override { return state_.mDisplayWidth; }
   int get_height_internal() override { return state_.mDisplayHeight; }
-  DisplayType get_display_type() override { return DISPLAY_TYPE_COLOR; }
+  display::DisplayType get_display_type() override { return display::DISPLAY_TYPE_COLOR; }
 
   // optional display parameters
   void set_display_width(uint8_t val) { state_.mDisplayWidth = val; }
@@ -115,6 +114,7 @@ class IPixelBLE :  public display::Display, public light::LightOutput, public bl
   void alarm_effect();
 
   protected:
+  void draw_absolute_pixel_internal(int x, int y, Color color) override;  // display
   void update_state_(const DeviceState &new_state);
 
   uint16_t handle_{0};
@@ -154,6 +154,6 @@ class IPixelBLE :  public display::Display, public light::LightOutput, public bl
   switch_::Switch *play_switch_{};
 };
 
-}  // namespace display
+}  // namespace ipixel_ble
 }  // namespace esphome
 

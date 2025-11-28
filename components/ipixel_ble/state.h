@@ -4,7 +4,7 @@
 #include <string>
 
 namespace esphome {
-namespace display {
+namespace ipixel_ble {
 
 enum effects {
     None,
@@ -67,5 +67,5 @@ class DeviceState {
 };
 
 
-}  // namespace display
+}  // namespace ipixel_ble
 }  // namespace esphome

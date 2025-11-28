@@ -4,7 +4,7 @@
 #include "ipixel_ble.h"
 
 namespace esphome {
-namespace display {
+namespace ipixel_ble {
 
 class DeleteSlotButton : public button::Button, public Parented<IPixelBLE> {
  public:
@@ -22,5 +22,5 @@ class UpdateTimeButton : public button::Button, public Parented<IPixelBLE> {
   void press_action() override { this->parent_->on_update_time_button_press(); }
 };
 
-}  // namespace display
+}  // namespace ipixel_ble
 }  // namespace esphome
