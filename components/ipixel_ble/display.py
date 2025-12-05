@@ -14,8 +14,8 @@ CONFIG_SCHEMA = cv.All (
     display.FULL_DISPLAY_SCHEMA.extend(
         {
             cv.GenerateID(CONF_IPIXEL_BLE): cv.use_id(IPixelBLE),
-            cv.Optional(CONF_WIDTH,  default = 32): cv.All(cv.uint16_t, cv.Range(min = 16, max = 128)),
-            cv.Optional(CONF_HEIGHT, default = 32): cv.All(cv.uint16_t, cv.Range(min = 16, max = 128)),
+            cv.Optional(CONF_WIDTH,  default = 0): cv.All(cv.uint16_t, cv.Range(min = 0, max = 512)),
+            cv.Optional(CONF_HEIGHT, default = 0): cv.All(cv.uint16_t, cv.Range(min = 0, max = 512)),
         }
     ),
     cv.has_at_most_one_key(CONF_PAGES, CONF_LAMBDA),
@@ -32,6 +32,8 @@ async def to_code(config):
         )
         cg.add(var.set_writer(lambda_))
 
-    # Set custom variables. Due to default values no need for availability
-    cg.add(var.set_display_width(config[CONF_WIDTH])),
-    cg.add(var.set_display_height(config[CONF_HEIGHT])),
+    # Set custom variables.
+    if cfg := config.get(CONF_WIDTH):
+        cg.add(var.set_display_width(cfg))
+    if cfg := config.get(CONF_HEIGHT):
+        cg.add(var.set_display_height(cfg))

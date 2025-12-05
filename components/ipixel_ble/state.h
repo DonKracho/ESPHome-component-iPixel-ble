@@ -30,8 +30,8 @@ class DeviceState {
 
   // sensors
   uint8_t mConnectionState{0};
-  uint8_t mDisplayWidth{32};
-  uint8_t mDisplayHeight{32};
+  uint16_t mDisplayWidth{0};
+  uint16_t mDisplayHeight{0};
   uint8_t mFontFlag{0};
   uint8_t mFontWidth{8};
   uint8_t mFontHeight{16};

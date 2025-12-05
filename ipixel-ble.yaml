@@ -29,8 +29,8 @@ wifi:
   password: !secret wifi_password
   
 external_components:
-  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices/components
-#  - source: D:\ESPHome-external-component-for-iPixel-ble-devices\components
+#  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices/components
+  - source: D:\ESPHome-external-component-for-iPixel-ble-devices\components
     refresh: 0s
     components: [ipixel_ble]
 
@@ -54,8 +54,8 @@ ipixel_ble:
 display:
   - platform: ipixel_ble
     rotation: 0
-    width: 32   # optional defaults to 32
-    height: 32  # optional defaults to 32
+    #width: 32   # use a fixed value if device recognition fails
+    #height: 32  # use a fixed value if device recognition fails
     lambda: |-
       auto red = Color(255, 0, 0);
       auto green = Color(0, 255, 0);

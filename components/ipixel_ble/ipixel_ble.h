@@ -5,6 +5,7 @@
 #include <esp_gattc_api.h>
 #include <algorithm>
 #include <iterator>
+#include <map>
 #include "esphome/components/display/display_buffer.h"
 #include "esphome/components/ble_client/ble_client.h"
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
@@ -22,6 +23,48 @@
 namespace esphome {
 namespace ipixel_ble {
 
+class DeviceInfo {
+public:
+  DeviceInfo() = default;
+
+  bool get_device_info(const std::vector<uint8_t> &res);
+  void set_name(std::string &name) { name_ = name; }
+
+  std::string name_{};
+  std::string mcu_version_{};
+  std::string wifi_verion_{};
+  bool has_wifi_{false};
+  bool password_flag_{false};
+  uint8_t width_{0};
+  uint8_t height_{0};
+
+private:
+  // known device types (byte 5 of notification buffer)
+  std::map<const uint8_t, std::pair<uint8_t, uint8_t>> display_size_
+  {
+    {128, {64, 64}},
+    {129, {32, 32}},
+    {130, {32, 16}},
+    {131, {64, 16}},
+    {132, {96, 16}},
+    {133, {64, 20}},
+    {134, {128, 32}},
+    {135, {144, 16}},
+    {136, {192, 16}},
+    {137, {48, 24}},
+    {138, {64, 32}},
+    {139, {96, 32}},
+    {140, {128, 32}},
+    {141, {96, 32}},
+    {142, {160, 32}},
+    {143, {192, 32}},
+    {144, {256, 32}},
+    {145, {320, 32}},
+    {146, {384, 32}},
+    {147, {448, 32}},
+  };
+};
+
 class IPixelBLE :  public display::DisplayBuffer, public light::LightOutput, public ble_client::BLEClientNode, public text::Text {
  public:
   IPixelBLE() {}
@@ -36,8 +79,8 @@ class IPixelBLE :  public display::DisplayBuffer, public light::LightOutput, pub
   display::DisplayType get_display_type() override { return display::DISPLAY_TYPE_COLOR; }
 
   // optional display parameters
-  void set_display_width(uint8_t val) { state_.mDisplayWidth = val; }
-  void set_display_height(uint8_t val) { state_.mDisplayHeight = val; }
+  void set_display_width(uint16_t val) { state_.mDisplayWidth = val; }
+  void set_display_height(uint16_t val) { state_.mDisplayHeight = val; }
   
   // ble client
   void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param) override;
@@ -120,7 +163,9 @@ class IPixelBLE :  public display::DisplayBuffer, public light::LightOutput, pub
   uint16_t handle_{0};
   esp32_ble_tracker::ESPBTUUID service_uuid_ = esp32_ble_tracker::ESPBTUUID::from_raw("000000fa-0000-1000-8000-00805f9b34fb");
   esp32_ble_tracker::ESPBTUUID characteristic_uuid_ = esp32_ble_tracker::ESPBTUUID::from_raw("0000fa02-0000-1000-8000-00805f9b34fb");
-                                              
+  esp32_ble_tracker::ESPBTUUID notify_uuid_ = esp32_ble_tracker::ESPBTUUID::from_raw("0000fa03-0000-1000-8000-00805f9b34fb");  
+
+  DeviceInfo  device_info_;
   DeviceState state_;
   std::vector<std::vector<uint8_t>> queue;
 

@@ -16,10 +16,47 @@ namespace ipixel_ble {
 
 const char *TAG = "ipixel_ble";
 
+bool DeviceInfo::get_device_info(const std::vector<uint8_t> &res) {
+  // gather informations from notify data as far as known
+  // 0C.00.01.80.81.39.2C.00.0C.01.00.01 (example 32x32 notifcatoin)
+  //
+  // Sprache Engish
+  // Gerätetyp 32x32
+  // MCU-Firmware-versions 11.03
+  // versions der Bluetooth Firmware: 7.02
+  //
+  // byte 0 length of notification in bytes (0x0C)
+  // byte 1 repeated command byte
+  // byte 2 repeated command byte
+  // byte 3 repeated command byte
+  // byte 4 encoded display size (has been hour before)
+  // byte 5 repeated minutes
+  // byte 6 repeated seconds
+  // byte 7 repeated language
+  // byte 8 variable value ?
+  // byte 9 static 0x01 ?
+  // byte 10 password flag ?
+  // byte 11 static 0x01 ?
+
+  if (res.size() < 5) {
+    return false;
+  }
+
+  auto const type = res[4];
+  width_ =  display_size_[type].first;
+  height_ =  display_size_[type].second;
+
+  if (res.size() >= 11) {
+    password_flag_ = res[10];
+  }
+
+  ESP_LOGD(TAG, "device info: name=%s size=%dx%d", name_.c_str(), width_, height_);
+
+  return width_ > 0 && height_ > 0;
+}
+
 // component
 void IPixelBLE::setup() {
-  // allocate framebuffer
-  state_.framebuffer_.resize(state_.mDisplayWidth * state_.mDisplayWidth * 3);
 }
 
 void IPixelBLE::loop() {
@@ -55,7 +92,7 @@ void IPixelBLE::update() {
 
 void IPixelBLE::draw_absolute_pixel_internal(int x, int y, Color color) {
   // take care to ignore x,y coordinates outside the avaialble framebuffer
-  if (x >= 0 && x < state_.mDisplayWidth && y >= 0 && y < state_.mDisplayHeight)
+  if (x >= 0 && x < state_.mDisplayWidth && y >= 0 && y < state_.mDisplayHeight && state_.framebuffer_.size() > 0)
   {
     int i = (y * state_.mDisplayWidth + x) * 3; // 3 bytes per pixel
 
@@ -68,85 +105,104 @@ void IPixelBLE::draw_absolute_pixel_internal(int x, int y, Color color) {
 // ble client component
 void IPixelBLE::gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if,
                                           esp_ble_gattc_cb_param_t *param) {
-
-  /* refer to https://github.com/espressif/esp-idf/blob/master/components/bt/host/bluedroid/api/include/api/esp_gattc_api.h
-  connection log:
-  [12:59:58][D][esp32_ble_client:154]: [0] [0F:D6:54:F9:D2:C7] ESP_GATTC_CONNECT_EVT
-  [12:59:58][D][ipixel_ble:085]: Unhandled GATT event: 40
-  [12:59:58][D][esp32_ble_client:154]: [0] [0F:D6:54:F9:D2:C7] ESP_GATTC_OPEN_EVT
-  [12:59:58][D][ipixel_ble:044]: GATT client opened.
-  [12:59:58][D][esp32_ble_tracker:115]: connecting: 0, discovered: 0, searching: 0, disconnecting: 0
-  [12:59:58][D][esp32_ble_tracker:282]: Starting scan...
-  [13:00:00][D][esp32_ble_client:352]: [0] [0F:D6:54:F9:D2:C7] Event 46
-  [13:00:00][D][ipixel_ble:085]: Unhandled GATT event: 46
-  [13:00:01][D][ipixel_ble:085]: Unhandled GATT event: 7
-  [13:00:01][D][ipixel_ble:085]: Unhandled GATT event: 7
-  [13:00:01][D][ipixel_ble:085]: Unhandled GATT event: 7
-  [13:00:01][D][esp32_ble_client:154]: [0] [0F:D6:54:F9:D2:C7] ESP_GATTC_SEARCH_CMPL_EVT
-  [13:00:01][I][esp32_ble_client:273]: [0] [0F:D6:54:F9:D2:C7] Connected
-  [13:00:01][D][esp32_ble_client:233]: [0] [0F:D6:54:F9:D2:C7] cfg_mtu status 0, mtu 517
-  [13:00:01][D][ipixel_ble:085]: Unhandled GATT event: 18
-  [13:00:01][D][esp32_ble_client:154]: [0] [0F:D6:54:F9:D2:C7] ESP_GATTC_REG_FOR_NOTIFY_EVT
-  [13:00:01][W][esp32_ble_client:320]: [0] [0F:D6:54:F9:D2:C7] esp_ble_gattc_get_descr_by_char_handle error, status=10
-  [13:00:01][D][ble_client:057]: All clients established, services released
-  */
+  // for events refer to https://github.com/espressif/esp-idf/blob/master/components/bt/host/bluedroid/api/include/api/esp_gattc_api.h
+  // for return unions refer to: https://sourcevu.sysprogs.com/espressif/esp-idf/symbols/esp_ble_gattc_cb_param_t
 
   switch (event) {
     case ESP_GATTC_OPEN_EVT:
-      ESP_LOGD(TAG, "GATT client opened.");
-	    this->state_.mConnectionState = 1;
+      ESP_LOGD(TAG, "ESP_GATTC_OPEN_EVT status:%d conn_id=%d *remote_bda=0x%x mtu=%d", param->open.status, param->open.conn_id, param->open.remote_bda, param->open.mtu);
       break;
 
     case ESP_GATTC_DISCONNECT_EVT:
-      ESP_LOGD(TAG, "GATT client disconnected.");
+      ESP_LOGD(TAG, "ESP_GATTC_DISCONNECT_EVT reason:%d conn_id=%d *remote_bda=0x%x", param->disconnect.reason, param->disconnect.conn_id, param->disconnect.remote_bda);
       this->node_state = esp32_ble_tracker::ClientState::DISCONNECTING;
       this->handle_ = 0;
 	    this->state_.mConnectionState = 0;
       break;
 
     case ESP_GATTC_SEARCH_CMPL_EVT:
-      if (param->search_cmpl.status != ESP_GATT_OK) {
-        ESP_LOGD(TAG, "Service search failed, status: %d", param->search_cmpl.status);
-        break;
-      }
+      ESP_LOGD(TAG, "GATTC_SEARCH_CMPL_EVT status:%d conn_id=%d source=%d", param->search_cmpl.status, param->search_cmpl.conn_id, param->search_cmpl.searched_service_source);
+      // register for notify
       this->ble_register_for_notify(this->parent()->get_gattc_if(), this->parent()->get_remote_bda());
       break;
 
     case ESP_GATTC_REG_FOR_NOTIFY_EVT:
-      if (param->reg_for_notify.status != ESP_GATT_OK) {
-        ESP_LOGD(TAG, "Register for notify failed, status: %d", param->reg_for_notify.status);
-        break;
+      ESP_LOGD(TAG, "GATTC_REG_FOR_NOTIFY_EVT status:%d handle=%d", param->reg_for_notify.status, param->reg_for_notify.handle);
+      if (param->reg_for_notify.status == ESP_GATT_OK) {
+        // now we are connected to the device and can collect some informations about the device
+        this->node_state = esp32_ble_tracker::ClientState::ESTABLISHED;
+	      this->state_.mConnectionState = 1;
+        
+        // get writer handle
+        auto *characteristic = this->parent()->get_characteristic(this->service_uuid_, this->characteristic_uuid_);
+        if (characteristic != nullptr && (characteristic->properties & ESP_GATT_CHAR_PROP_BIT_WRITE) != 0) {
+          this->handle_ = characteristic->handle;
+        } else {
+          ESP_LOGD(TAG, "Write characteristic not found.");
+          break;
+        }
+
+        // get device name
+        characteristic = this->parent()->get_characteristic(0x1800, ESP_GATT_UUID_GAP_DEVICE_NAME);
+        if (characteristic != nullptr && (characteristic->properties & ESP_GATT_CHAR_PROP_BIT_READ) != 0) {
+          // result comes via read event
+          ble_read_chr(this->parent()->get_gattc_if(), this->parent()->get_remote_bda(), characteristic->handle);
+        } else {
+          ESP_LOGD(TAG, "Access characteristic not found.");
+        }
+
+        // initialize device: synchronize time. This commands also forces the device info notification!
+        this->on_update_time_button_press();  // triggers time update
       }
-      this->node_state = esp32_ble_tracker::ClientState::ESTABLISHED;
       break;
 
     case ESP_GATTC_NOTIFY_EVT:
-      if (param->notify.conn_id != this->parent()->get_conn_id())
-        break;
-      if (param->notify.handle == this->handle_) {
+      ESP_LOGD(TAG, "GATTC_NOTIFY_EVT conn_id=%d handle=%d len=%d is_notify=%d", param->notify.conn_id, param->notify.handle, param->notify.value_len, param->notify.is_notify);
+      if (param->notify.conn_id == this->parent()->get_conn_id()) {
         std::vector<uint8_t> data(param->notify.value, param->notify.value + param->notify.value_len);
         this->on_notification_received(data);
       }
       break;
 
-    case ESP_GATTC_CFG_MTU_EVT:
-      if (param->cfg_mtu.status != ESP_GATT_OK) {
-        ESP_LOGD(TAG, "Config mtu failed, status: %d", param->cfg_mtu.status);
-        break;
-      }
-      else {
-        ESP_LOGD(TAG, "GATTC_CFG_MTU_EVT: %d", param->cfg_mtu.mtu);
-      }
+    case ESP_GATTC_CFG_MTU_EVT: // Maximun Transfer Unit
+      ESP_LOGD(TAG, "ESP_GATTC_CFG_MTU_EVT status: %d, conn_id=%d, mtu=%d ", param->cfg_mtu.status, param->cfg_mtu.conn_id, param->cfg_mtu.mtu);
+      break;
+
+    case ESP_GATTC_CONNECT_EVT:
+      ESP_LOGD(TAG, "ESP_GATTC_CONNECT_EVT conn_id=%d link_role=%d conn_handle=%d", param->connect.conn_id, param->connect.link_role, param->connect.conn_handle);
+      ESP_LOGD(TAG, "conn_params: interval=%d latency=%d timeout=%d", param->connect.conn_params.interval, param->connect.conn_params.latency, param->connect.conn_params.timeout);
+      break;
+    
+    case ESP_GATTC_SEARCH_RES_EVT:
+      ESP_LOGD(TAG, "ESP_GATTC_SEARCH_RES_EVT");
+      ESP_LOGD(TAG, "conn_id=%d", param-> search_res.conn_id);
+      ESP_LOGD(TAG, "start_hanle=%d", param->search_res.start_handle);
+      ESP_LOGD(TAG, "end_handle=%d", param->search_res.end_handle);
+      ESP_LOGD(TAG, "srvc_id: uuid={len=%d uuid=0x%x} inst_id=%d", param->search_res.srvc_id.uuid.len, param->search_res.srvc_id.uuid.uuid.uuid16, param->search_res.srvc_id.inst_id);
+      ESP_LOGD(TAG, "is_primary: %s", param->search_res.is_primary ? "true": "false");
+      break;
+
+    case ESP_GATTC_DIS_SRVC_CMPL_EVT:
+      ESP_LOGD(TAG, "ESP_GATTC_DIS_SRVC_CMPL_EVT status=%d conn_id=%d", param->dis_srvc_cmpl.status, param->dis_srvc_cmpl.conn_id);
       break;
 
     case ESP_GATTC_READ_CHAR_EVT:
+      ESP_LOGD(TAG, "ESP_GATTC_READ_CHAR_EVT status=%d conn_id=%d handle=%d len=%d", param->read.status, param->read.conn_id, param->read.handle, param->read.value_len);
+      if (param->read.status == ESP_GATT_OK) {
+        // this is the only read command ever send. (access service / device name)
+        std::string data(param->read.value, param->read.value + param->read.value_len);
+        device_info_.set_name(data);
+      }
+      break;
+    
     case ESP_GATTC_WRITE_CHAR_EVT:
+      ESP_LOGD(TAG, "ESP_GATTC_WRITE_CHAR_EVT status=%d conn_id=%d handle=%d offset=%d", param->write.status, param->write.conn_id, param->write.handle, param->write.offset);
       break;
 
-    case ESP_GATTC_SEARCH_RES_EVT:    // 7  This event is triggered each time a service result is obtained using `esp_ble_gattc_search_service`.
-    //case ESP_GATTC_CFG_MTU_EVT:       // 18 This event is triggered upon the completion of the MTU configuration with `esp_ble_gattc_send_mtu_req`. sends: cfg_mtu status 0, mtu 517
-    case ESP_GATTC_CONNECT_EVT:       // 40 This event is triggered when the physical connection is set up.
-    case ESP_GATTC_DIS_SRVC_CMPL_EVT: // 46 This event is triggered when the GATT service discovery is completed.
+    case ESP_GATTC_CLOSE_EVT:
+      ESP_LOGD(TAG, "ESP_GATTC_CLOSE_EVT status=%d conn_id=%d *remote_bda=0x%x reason=%d", param->close.status, param->close.conn_id, param->close.remote_bda, param->close.reason);
+      break;
+
     default:
       ESP_LOGD(TAG, "Unhandled GATT event: %d", event);
       break;
@@ -173,15 +229,15 @@ bool IPixelBLE::ble_read_chr(esp_gatt_if_t gattc_if, esp_bd_addr_t remote_bda, u
 }
 
 bool IPixelBLE::ble_register_for_notify(esp_gatt_if_t gattc_if, esp_bd_addr_t remote_bda) {
-  auto *chr = this->parent()->get_characteristic(this->service_uuid_, this->characteristic_uuid_);
-  if (!chr) {
-    ESP_LOGD(TAG, "Characteristic not found.");
-    return false;
-  }
-  this->handle_ = chr->handle;
-  esp_err_t ret = esp_ble_gattc_register_for_notify(gattc_if, remote_bda, this->handle_);
-  if (ret != ESP_OK) {
-    ESP_LOGD(TAG, "Register for notify failed, status: %d", ret);
+  auto *chr = this->parent()->get_characteristic(this->service_uuid_, this->notify_uuid_);
+  if (chr != nullptr && (chr->properties & ESP_GATT_CHAR_PROP_BIT_NOTIFY) != 0) {
+    esp_err_t ret = esp_ble_gattc_register_for_notify(gattc_if, remote_bda, chr->handle);
+    if (ret != ESP_OK) {
+      ESP_LOGD(TAG, "Register for notify failed, status: %d", ret);
+      return false;
+    }
+  } else {
+    ESP_LOGD(TAG, "Notify characteristic not found.");
     return false;
   }
   return true;
@@ -189,6 +245,23 @@ bool IPixelBLE::ble_register_for_notify(esp_gatt_if_t gattc_if, esp_bd_addr_t re
 
 void IPixelBLE::on_notification_received(const std::vector<uint8_t> &data) {
   ESP_LOGD(TAG, "Notification received: %s", format_hex_pretty(data).c_str());
+  // each command send to the device notifys with a 5 byte response starting with 0x05. Ignore these notifys!
+  if (data[0] != 0x05 && data[4] >= 0x80) {
+    if (device_info_.get_device_info(data)) {
+      // if no explicit display size set in esphome yaml file, use the display size detected
+      if (state_.mDisplayWidth == 0) { 
+        state_.mDisplayWidth = device_info_.width_;
+      }
+      if (state_.mDisplayHeight == 0) {
+        state_.mDisplayHeight = device_info_.height_;
+      }
+      size_t new_size = state_.mDisplayWidth * state_.mDisplayWidth * 3;
+      if (state_.framebuffer_.size() != new_size) { 
+        // allocate framebuffer
+        state_.framebuffer_.resize(new_size);
+      }
+    }
+  }
 }
 
 void IPixelBLE::control(const std::string &value) {
@@ -361,7 +434,7 @@ void IPixelBLE::queueTick() {
     size_t chunkSize = std::min(500, (int)command.size());
 
     //Write bytes from command
-    ble_write_chr(this->parent()->get_gattc_if(), this->parent()->get_remote_bda(), this->handle_, command.data(), chunkSize);
+    bool write_ok = ble_write_chr(this->parent()->get_gattc_if(), this->parent()->get_remote_bda(), this->handle_, command.data(), chunkSize);
 
     //Remove bytes from command
     command.erase(command.begin(), command.begin() + chunkSize);
@@ -371,6 +444,12 @@ void IPixelBLE::queueTick() {
 
     //Do not overload BLE
     delay(100);
+
+    // disconnect if write fails
+    if (!write_ok) {
+      ESP_LOGE(TAG, "BLE write failed or no ACK received, disconnecting...");
+      client->disconnect();
+    }
 }
 
 void IPixelBLE::queuePush(std::vector<uint8_t> command) {

@@ -27,7 +27,7 @@ namespace iPixelCommads {
         frame[4] = (uint8_t)hour;
         frame[5] = (uint8_t)minute;
         frame[6] = (uint8_t)second;
-        frame[7] = 0x00;
+        frame[7] = 0x04; // language German
 
         return frame;
     }
