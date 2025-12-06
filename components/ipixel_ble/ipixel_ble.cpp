@@ -255,7 +255,7 @@ void IPixelBLE::on_notification_received(const std::vector<uint8_t> &data) {
       if (state_.mDisplayHeight == 0) {
         state_.mDisplayHeight = device_info_.height_;
       }
-      size_t new_size = state_.mDisplayWidth * state_.mDisplayWidth * 3;
+      size_t new_size = state_.mDisplayWidth * state_.mDisplayHeight * 3;
       if (state_.framebuffer_.size() != new_size) { 
         // allocate framebuffer
         state_.framebuffer_.resize(new_size);
@@ -563,42 +563,36 @@ void IPixelBLE::time_date_effect() {
 
 void IPixelBLE::load_png_effect() {
   if (state_.mEffect == LoadPNG) {
-    queuePush( iPixelCommads::sendPNG(Helpers::hexStringToVector(state_.png_)) );
+    queuePush( iPixelCommads::sendImage(Helpers::hexStringToVector(state_.png_)) );
   }
 }
 
 void IPixelBLE::load_gif_effect() {
   if (state_.mEffect == LoadGIF) {
     do_update_(); // call display lambda writer
-    queuePush( iPixelCommads::sendPNG( state_.framebuffer_ ) );
+    queuePush( iPixelCommads::sendImage( state_.framebuffer_ ) );
   }
 }
 
 void IPixelBLE::fill_color_effect() {
-  const uint8_t width = state_.mDisplayWidth;
-  const uint8_t height = state_.mDisplayHeight;
-
   // Fill framebuffer with color
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
+  for (int x = 0; x < state_.mDisplayWidth; x++) {
+    for (int y = 0; y < state_.mDisplayHeight; y++) {
       draw_pixel_at(x, y, Color(state_.mR, state_.mG, state_.mB));
     }
   }
-  queuePush( iPixelCommads::sendPNG( state_.framebuffer_ ) );
+  queuePush( iPixelCommads::sendImage( state_.framebuffer_ ) );
 }
 
 void IPixelBLE::fill_rainbow_effect() {
-  const uint8_t width = state_.mDisplayWidth;
-  const uint8_t height = state_.mDisplayHeight;
-
   // Fill framebuffer with rainbow
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
+  for (int x = 0; x < state_.mDisplayWidth; x++) {
+    for (int y = 0; y < state_.mDisplayHeight; y++) {
 
-      int i = (y * width + x) * 3; // 3 bytes per pixel shitet by x
+      int i = (y * state_.mDisplayWidth + x) * 3; // 3 bytes per pixel shitet by x
 
       // Hue-based rainbow
-      float h = (float(x) + float(y)) / (width);
+      float h = (float(x) + float(y)) / (state_.mDisplayWidth);
       float r = fabs(sin(h * 3.14159f));
       float g = fabs(sin((h + 0.33f) * 3.14159f));
       float b = fabs(sin((h + 0.66f) * 3.14159f));
@@ -606,7 +600,7 @@ void IPixelBLE::fill_rainbow_effect() {
       draw_pixel_at(x, y, Color(r * 255, g * 255, b * 255));
     }
   }
-  queuePush( iPixelCommads::sendPNG( state_.framebuffer_ ) );
+  queuePush( iPixelCommads::sendImage( state_.framebuffer_ ) );
 }
 
 float frand() { return (float) rand() / RAND_MAX; }

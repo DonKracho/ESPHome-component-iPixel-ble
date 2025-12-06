@@ -23,6 +23,7 @@ namespace Helpers {
 
     //Returns the frame size in a vector of size bytes
     std::vector<uint8_t> getFrameSize(const std::vector<uint8_t>& data, size_t size);
+    std::vector<uint8_t> getFrameSize(size_t byte_count, size_t size);
 
     //Turns a hex string into a vector
     std::vector<uint8_t> hexStringToVector(const std::string &hexString);

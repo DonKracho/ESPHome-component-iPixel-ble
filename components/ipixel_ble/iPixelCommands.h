@@ -24,6 +24,5 @@ namespace iPixelCommads {
     std::vector<uint8_t> setRhythmLevelMode(int style, const int levels[11]);
     std::vector<uint8_t> setRhythmAnimationMode(int style, int frameNumber);
     std::vector<uint8_t> sendText(const std::string &text, int animation, int save_slot, int speed, uint8_t colorR, uint8_t colorG, uint8_t colorB, int text_mode, int font_flag);
-    std::vector<uint8_t> sendPNG(const std::vector<uint8_t> &data);
-    std::vector<uint8_t> sendGIF(const std::vector<uint8_t> &data);
+    std::vector<uint8_t> sendImage(const std::vector<uint8_t> &data, bool ix_gif = false);
 }

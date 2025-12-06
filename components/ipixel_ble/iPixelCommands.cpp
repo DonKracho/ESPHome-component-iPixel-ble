@@ -1,5 +1,9 @@
 #include "iPixelCommands.h"
-#include <esp_log.h>
+#include <algorithm>
+
+//#undef ESPHOME_LOG_LEVEL
+//#define ESPHOME_LOG_LEVEL ESPHOME_LOG_LEVEL_DEBUG
+#include "esphome/core/log.h"
 
 namespace iPixelCommads {
 
@@ -292,43 +296,55 @@ namespace iPixelCommads {
         return result;
     }
 
-    std::vector<uint8_t> sendPNG(const std::vector<uint8_t> &pngData) {
-        std::vector<uint8_t> checksum = Helpers::calculateCRC32Bytes(pngData);
-        std::vector<uint8_t> pngSize = Helpers::getFrameSize(pngData, 4);
+    std::vector<uint8_t> sendImage(const std::vector<uint8_t> &data, bool is_gif) {
+        std::vector<uint8_t> size_bytes = Helpers::getFrameSize(data, 4);
+        std::vector<uint8_t> crc_bytes = Helpers::calculateCRC32Bytes(data);
 
         std::vector<uint8_t> result;
-        result.insert(result.end(), { 0xFF, 0xFF }); //Placeholder for Frame Size
-        result.insert(result.end(), { 0x02, 0x00, 0x00 }); //Prefix
-        result.insert(result.end(), pngSize.begin(), pngSize.end()); //PNG Size
-        result.insert(result.end(), checksum.begin(), checksum.end()); //Checksum
-        result.insert(result.end(), { 0x00, 0x65 }); //Mid
-        result.insert(result.end(), pngData.begin(), pngData.end()); //Data
 
-        //Replace Placeholder for Frame Size
-        std::vector<uint8_t> frameSize = Helpers::getFrameSize(result, 2);
-        result[0] = frameSize[0];
-        result[1] = frameSize[1];
-        
-        return result;
-    }
+        const size_t data_size = data.size(); 
+        const size_t chunk_size = 12 * 1024;
+        size_t chunk_index = 0;
+        size_t pos = 0;
+        size_t accu_size = 0;
+        size_t curr_size;
 
-    std::vector<uint8_t> sendGIF(const std::vector<uint8_t> &gifData) {
-        std::vector<uint8_t> checksum = Helpers::calculateCRC32Bytes(gifData);
-        std::vector<uint8_t> pngSize = Helpers::getFrameSize(gifData, 4);
+        while (pos < data.size())
+        {
+            size_t chunk_end = std::min(pos + chunk_size, data.size());
+            ESP_LOGD(TAG, "data_size=%d chunk_end=%d", data_size, chunk_end);
 
-        std::vector<uint8_t> result;
-        result.insert(result.end(), { 0xFF, 0xFF }); //Placeholder for Frame Size
-        result.insert(result.end(), { 0x03, 0x00, 0x00 }); //Prefix
-        result.insert(result.end(), pngSize.begin(), pngSize.end()); //PNG Size
-        result.insert(result.end(), checksum.begin(), checksum.end()); //Checksum
-        result.insert(result.end(), { 0x02, 0x01 }); //Mid
-        result.insert(result.end(), gifData.begin(), gifData.end()); //Data
+            uint8_t option = chunk_index == 0 ? 0x00 : 0x02;
+            uint8_t serial = chunk_index == 0 ? 0x01 : 0x65;
 
-        //Replace Placeholder for Frame Size
-        std::vector<uint8_t> frameSize = Helpers::getFrameSize(result, 2);
-        result[0] = frameSize[0];
-        result[1] = frameSize[1];
-        
+            result.insert(result.end(), { 0xFF, 0xFF }); // Placeholder for Frame Size
+
+            if (is_gif) {
+                result.insert(result.end(), { 0x03, 0x00, option });                // prefix
+                result.insert(result.end(), size_bytes.begin(), size_bytes.end());  // size (4 bytes)
+                result.insert(result.end(), crc_bytes.begin(), crc_bytes.end());    // checksum
+                result.insert(result.end(), { 0x02, serial });                      // header end
+            } else {          
+                result.insert(result.end(), { 0x02, 0x00, option });                // prefix
+                result.insert(result.end(), size_bytes.begin(), size_bytes.end());  // size (4 bytes)
+                result.insert(result.end(), crc_bytes.begin(), crc_bytes.end());    // checksum
+                result.insert(result.end(), { 0x00, 0x65 });                        // header end
+            }
+
+            result.insert(result.end(), data.begin() + pos, data.begin() + pos + chunk_end); // insert data chunk
+
+            curr_size = result.size() - accu_size;
+            accu_size += curr_size;
+
+            //Replace Placeholder for Frame Size
+            std::vector<uint8_t> frameSize = Helpers::getFrameSize(curr_size, 2);
+            result[0] = frameSize[0];
+            result[1] = frameSize[1];
+
+            chunk_index += 1;
+            pos = chunk_end;
+        }
+
         return result;
     }
 
