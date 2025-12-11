@@ -1,0 +1,325 @@
+substitutions:
+  image_resolution: 32x32
+
+esphome:
+  name: ipixel-stripe
+  friendly_name: LED Pixel Stripe
+  libraries:
+    - ErriezCRC32 = https://github.com/donkracho/ErriezCRC32
+  on_boot:
+    priority: 200  
+    then:
+      - wait_until:  
+          condition:
+            wifi.connected: 
+          timeout: 5s
+
+esp32:
+  variant: esp32s3
+  board: esp32-s3-devkitc-1
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+
+# Enable logging ESP32 C3 reuses UART0
+logger:
+  baud_rate: 115200
+  hardware_uart: UART0
+  level: debug
+
+# pngle requires a lot of ram this is the setting for an  ESP32-S3-N16R8
+psram:
+  mode: octal
+  speed: 80MHz
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret esphome_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret esphome_ota_key
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  on_connect:
+    - component.update: png_image_id
+    - delay: 1000ms
+    - component.update: jpg_image_id
+    - delay: 1000ms
+    - component.update: bmp_image_id
+
+external_components:
+  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices/components
+#  - source: D:\ESPHome-external-component-for-iPixel-ble-devices\components
+    refresh: 0s
+    components: [ipixel_ble]
+
+# Include custom fonts
+font:
+  - file: "gfonts://Roboto"
+    id: roboto
+    size: 16
+    glyphsets: GF_Latin_Core
+  - file: "gfonts://Roboto"
+    id: roboto_small
+    size: 12
+    glyphsets: GF_Latin_Core
+
+# required by ble_client    
+esp32_ble_tracker:
+
+ble_client:
+  id: ble_client_id
+  # put the BLE MAC address of your device here
+  mac_address: 0F:D6:54:F9:D2:C7  # 32x32
+#  mac_address: C3:AD:E7:8A:97:CA  # 192x16
+
+ipixel_ble:
+    id: ipixel_ble_id
+    ble_client_id: ble_client_id
+
+display:
+  - platform: ipixel_ble
+    rotation: 0
+    #width: 32   # use a fixed value if device recognition fails
+    #height: 32  # use a fixed value if device recognition fails
+    update_interval: never
+    lambda: |-
+          auto red = Color(255, 0, 0);
+          auto green = Color(0, 255, 0);
+          auto blue = Color(0, 0, 255);
+          auto black = Color(0, 0, 0);
+          auto white = Color(255, 255, 255);
+          auto w = it.get_width();
+          auto h = it.get_height();
+          int8_t index = id(slot_number).state;
+          switch (index) {
+          case 1:
+            // draw a simple smiley
+            it.filled_circle(15, 15, 14, Color(255, 255, 0));
+            it.line(8, 20, 24, 20, red);
+            it.line(10, 21, 22, 21, red);
+            it.line(12, 22, 20, 22, red);
+            it.rectangle( 0, 0, 32, 32, blue);
+            it.filled_circle(9, 9, 5, white);
+            it.filled_circle(22, 9, 5, white);
+            it.filled_circle(10, 10, 2, Color(0, 0, 0));
+            it.filled_circle(23, 10, 2, Color(0, 0, 0));
+            break;
+          case 2:
+            // draw text
+            it.filled_rectangle(0, 0, w, 6, red);
+            it.filled_rectangle(0, h-6, w, 6, red);
+            it.print(w/2, h/2, id(roboto), white, TextAlign::CENTER, id(text_id).state.c_str());
+            break;
+          case 3:
+            // show some sensor values
+            it.printf(w/2, h/4, id(roboto_small), blue, TextAlign::CENTER, "x:%0.0f", id(display_width).state);
+            it.printf(w/2, h/4*3, id(roboto_small), blue, TextAlign::CENTER, "y:%0.0f", id(display_height).state);
+            break;
+          case 8:
+            // reserved for png image
+            it.image(0, 0, id(png_image_id));
+            break;
+          case 9:
+            // reserved for jpg image
+            it.image(0, 0, id(jpg_image_id));
+            break;
+          case 10:
+            // reserved for bmp image
+            it.image(0, 0, id(bmp_image_id));
+            break;
+          default:
+            it.filled_ring(w/2, h/2, (h/2)-4, (h/2)-1, green);
+            it.printf(w/2, h/2, id(roboto), white, TextAlign::CENTER, "%d", index);
+            break;
+          }
+          //index += 1;
+          //if (index > 5 ) index = 1;
+
+light:
+  - platform: ipixel_ble
+    id: control_id
+    name: Control
+    default_transition_length: 0s
+    initial_state:
+      state: ON
+    restore_mode: RESTORE_AND_ON
+    effects:
+      - lambda:
+          name: Time
+          lambda: |-
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::Time);
+      - lambda:
+          name: Time & Date
+          lambda: |-
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::TimeDate);
+      - lambda:
+          name: Message
+          lambda: |-
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::Message);
+      - lambda:
+          name: Load Image
+          lambda: |-
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::LoadImage);
+      #- lambda:
+      #    name: Load GIF
+      #    lambda: |-
+      #      id(ipixel_ble_id).set_effect(ipixel_ble::effects::LoadGIF);
+      - lambda:
+          name: Fill Color
+          lambda: |-
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::FillColor);
+      - lambda:
+          name: Fill Rainbow
+          lambda: |-
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::FillRainbow);
+      - lambda:
+          name: Random Pixels
+          lambda: |-
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::RandomPixels);
+      - lambda:
+          name: Alarm
+          lambda: |-
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::Alarm);
+
+sensor:
+  - platform: ipixel_ble
+    connect_state:
+      name: "Connect State"
+      id: connect_state
+      icon: mdi:bluetooth
+    display_width:
+      name: "Display Width"
+      id: display_width
+      icon: mdi:arrow-expand-horizontal
+    display_height:
+      name: "Display Height"
+      id: display_height
+      icon: mdi:arrow-expand-vertical
+    font_width:
+      name: "Font Width"
+      id: font_width
+      icon: mdi:arrow-left-right
+    font_height:
+      name: "Font Height"
+      id: font_height
+      icon: mdi:arrow-up-down
+    orientation:
+      name: "Orientation"
+      id: orientation
+      icon: mdi:screen-rotation
+    fun_mode:
+      name: "Fun Mode"
+      id: fun_mode
+      icon: mdi:emoticon-outline
+
+number:
+  - platform: ipixel_ble
+    clock_style:
+      name: "Clock style"
+      id: clock_style
+      icon: mdi:clock-digital
+    slot_number:
+      name: "Lambda Slot"
+      id: slot_number
+      icon: mdi:numeric-1-box-multiple-outline
+    annimation_mode:
+      name: "Annimation Mode"
+      id: annimation_mode
+      icon: mdi:animation-outline
+    annimation_speed:
+      name: "Annimation Speed"
+      id: annimation_speed
+      icon: mdi:play-speed
+    font_flag:
+      name: "Font Flag"
+      id: font_flag
+      icon: mdi:format-size
+    text_mode:
+      name: "Text Mode"
+      id: text_mode
+      icon: mdi:palette
+
+button:
+  - platform: ipixel_ble
+    delete_slot:
+      name: "Delete Slot"
+      id: delete_slot_button
+      internal: true
+    update_time:
+      name: "Update Time"
+      id: update_time_button
+
+switch:
+  - platform: ipixel_ble
+    play:
+      name: "Play"
+      id: play_switch
+      internal: true
+
+text:
+  - platform: template 
+    name: Text or Image URL
+    id: text_id
+    mode: text
+    initial_value: "Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich 1234567890"
+    optimistic: true
+    icon: "mdi:keyboard-settings-outline"
+    update_interval: never
+    on_value:
+      - lambda: |-
+          if (x.rfind(".png") != std::string::npos) {
+            id(png_image_id).set_url(x);
+            id(png_image_id).update();
+          } else if (x.rfind(".jpg") != std::string::npos) {
+            id(jpg_image_id).set_url(x);
+            id(jpg_image_id).update();
+          } else if (x.rfind(".bmp") != std::string::npos) {
+            id(bmp_image_id).set_url(x);
+            id(bmp_image_id).update();
+          } else if (x.rfind(".gif") != std::string::npos) {
+            ESP_LOGD("text_id", "gif not implemented");
+          } else {
+            ESP_LOGD("text_id", "no image extention found, setting text");
+            id(ipixel_ble_id).set_text(x);
+            id(ipixel_ble_id).show_image(2);
+          }
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+# do not use until the device has at least 4MB PSRAM available 
+http_request:
+  
+online_image: #https://icon-icons.com/
+  - id: png_image_id
+    url: "https://raw.githubusercontent.com/DonKracho/ESPHome-external-component-for-iPixel-ble-devices/refs/heads/main/sample-images/32x32/png/earth.png"
+    format: PNG
+    type: RGB
+    transparency: chroma_key
+    resize: ${image_resolution}
+    on_download_finished:
+      - lambda: |-
+          id(ipixel_ble_id).show_image(8);
+  - id: jpg_image_id
+    url: "https://raw.githubusercontent.com/DonKracho/ESPHome-external-component-for-iPixel-ble-devices/refs/heads/main/sample-images/32x32/jpg/flower.jpg"
+    format: JPEG
+    type: RGB
+    transparency: chroma_key
+    resize: ${image_resolution}
+    on_download_finished:
+      - lambda: |-
+          id(ipixel_ble_id).show_image(9);
+  - id: bmp_image_id
+    url: "https://raw.githubusercontent.com/DonKracho/ESPHome-external-component-for-iPixel-ble-devices/refs/heads/main/sample-images/32x32/bmp/smiley-with-glasses-and-mustache.bmp"
+    format: BMP
+    type: RGB
+    resize: ${image_resolution}
+    on_download_finished:
+      - lambda: |-
+          id(ipixel_ble_id).show_image(10);

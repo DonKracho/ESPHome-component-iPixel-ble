@@ -417,7 +417,7 @@ const uint8_t font_MORSEKP800_8x16[4096] = {
         return ret;
     }
 
-    bool encodeText(const std::string& text, int font_flag, uint8_t r, uint8_t g, uint8_t b, uint &length, std::vector<uint8_t> &frame) {
+    bool encodeText(const std::string& text, int font_flag, uint8_t r, uint8_t g, uint8_t b, size_t &length, std::vector<uint8_t> &frame) {
 
 		// font_flag 0: 8x16 1: 16x16 2: 16x32 3: 8x16 -> 0x80 
 

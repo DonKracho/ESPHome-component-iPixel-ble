@@ -182,7 +182,7 @@ namespace iPixelCommads {
 
         std::vector<uint8_t> frame(5 + 11);
         frame[0] = 0x10;
-        frame[1] = 0x00; 
+        frame[1] = 0x00;
         frame[2] = 0x01;
         frame[3] = 0x02;
         frame[4] = (uint8_t)style;
@@ -218,7 +218,7 @@ namespace iPixelCommads {
         checkRange("rainbow_mode", rainbow_mode, 0, 9);
         checkRange("font_flag", font_flag, 0, 4);
 
-        uint length = text.length();
+        size_t length = text.length();
         std::vector<uint8_t> chars_bytes;
         Helpers::encodeText(text, font_flag, r, g, b, length, chars_bytes);
 

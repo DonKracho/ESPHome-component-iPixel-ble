@@ -29,6 +29,6 @@ namespace Helpers {
     std::vector<uint8_t> hexStringToVector(const std::string &hexString);
 
     //Coverts UTF8 string characters to bitmaps
-    bool encodeText(const std::string& text, int font_flag, uint8_t r, uint8_t g, uint8_t b, uint &length, std::vector<uint8_t> &frame);
+    bool encodeText(const std::string& text, int font_flag, uint8_t r, uint8_t g, uint8_t b, size_t &length, std::vector<uint8_t> &frame);
 
 } // namespace Helpers

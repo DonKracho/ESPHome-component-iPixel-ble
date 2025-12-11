@@ -2,7 +2,10 @@
 
 <img src="docs/LEDPixelBoard.jpg" alt="LED Pixel Board" width="600">
 
-This repository contains an ESPHome external component that enables control of a Bluetooth‐enabled Pixel Display. It is non intrusive - no modification of the display is required. It just emulates the known iPixel Color App commands.
+This repository contains an ESPHome external component that enables control of a Bluetooth‐enabled iPixel Display. It is non intrusive - no modification of the display is required. It just emulates the known iPixel Color App commands. At least ESPHome version 2025.11.0 is required.
+
+## Update 2025/10/12
+Using an ESP32-S3-N16R8 module now online PNG, JPG and BMP files can be loaded and displayed. Just switch to te Load Image effect and copy the URL of an online image into the data text field. The images get resized to 32x32. Due to the limited resources even of an ESP32-S3 it is recommended to use small images only. This will keep loading times short and prevents the module from running out of memory or crashing in worst case.
 
 ## Table of Contents
 
@@ -43,12 +46,12 @@ Definitely the App only. The App is quite complpex providing several image datab
 ## Part Two: Hasn’t This Been Done Already?
 
 Many have requested to control these devices, but none of the available solutions met my specific needs:
-- My main usage of the display will be a nerdy clock visualization provided by the display firmware.
+- My main usage of the display will be a nerdy clock visualization provided by the display firmware itself.
 - Synchronizing the time without having to use the app.
-- Enabled to intrgrate with HomeAssistant / ESPhome.
+- Enabled to intergrate with HomeAssistant / ESPhome.
 - Send a text message from HomeAssistant automations.
 - The existing approaches did not show text and images on my specific 32x32 device.
-- Cheap (using a RSP32 C3 super lite module about 3$).
+- Cheap (using an ESP32-C3 Super Lite module about 3$).
 - So far my Python knowledge is limited. I wanted to use my C++ skills.
 - Get rid of any Arduino framewort stuff, because in 2026 ESPHome will support the esp-idf only.
 
@@ -86,7 +89,7 @@ All commands sending a few bytes only, like led on/off set pixel, setting and se
 The display did not show any text and images with the existing repositories.
 
 ### Knowing the problem is half of its solution
-I did some BLE sniffig and figured out that this display does support monospaced 8x16, 16x16 and 32x16 font matrixes only. Therefore sending text chars ist different from the existing implementations.
+I did some BLE sniffig and figured out that this display does support monospaced 16x8, 16x16 and 32x16 font matrixes only. Therefore sending text chars is different from the existing implementations. (These also have got fixed meanwhile)
 
 ## Part Four: External Component Implementation
 ### What Has Been Done?
@@ -98,36 +101,22 @@ I did some BLE sniffig and figured out that this display does support monospaced
 One major discovery is that no single protocol exists for communicating with all BLE-enabled controllers. Most existing documentation and repositories focus on one. But at least other do exist the iPixel Color app is aware of only by evaluating firmware versions and display size. It requires people who own these devices, especially the none working, to do some debugging.
 
 ### Framework Selection
-The BLE stack occupies a significant amount of flash memory. Combined with several sensors, buttons, and other components, this quickly exceeded the 4MB flash capacity (2MB App, 2MB OTA) of my ESP32-C3 Super Lite. I found that the ESP-IDF framework produces a smaller binary compared to the Arduino framework. In future ESPHome will support the ESP-IDF only. Therefore it is strongly regcommended to use it right now.
+The BLE stack occupies a significant amount of flash memory. Combined with several sensors, buttons, and other components, this quickly exceeds the 4MB flash capacity (2MB App, 2MB OTA) of an ESP32-C3 Super Lite module. I found that the ESP-IDF framework produces a smaller binary compared to the Arduino framework. Announced for 2026 ESPHome will support the ESP-IDF only! Therefore it is strongly regcommended to use it right now. (The majpr difference is using the ESP_LOGx macros instead of Arduino-Sprintf and std::strings instead of Arduino-String)
 
 ## Part Five: Future Work / ToDo
 
 - **Known issues:**  
-  - tested with display size 32x32 and 16x96 only. The size is captued from the device. If the size recognition fails the width and height parameters can be set in ipixel_ble.yaml display section.
-  - switching off and on the light does set the effect to None. I found no elegant way to propagate the last running effect to the light component. (I pepared it according the dev branch of ESPHome but the functions are not available in version 2025.2.0)
+  - tested with display size 32x32 and 192x16 only. The size is captued from the device. If the size recognition fails the width and height parameters can be set in ipixel_ESP-xyz.yaml display section.
+  - switching off and on the light does set the effect to None. I found no elegant way to propagate the last running effect to the light component.
   - 16x16 and 16x32 font bitmaps are generated by stupid doubling bits and rows with no smoothing. It was just an easy way to get it to work.
   - The yaml file has some internal components. They are pepared, but not used and implemented right now. Deleting these may cause compilation erros!
-  - With the 16x96 display the first 2 pixels of a frame load are garbage.
+  - With the 192x16 display the first 2 pixels of a loaded frame are garbage.
   
-- **Sending PNG and animated GIFs**  
-  Unfortunately the text (data) component is limited to 255 bytes. Using the max_length parameter in text.py configuration file did not apply. I need to figure out how to get a big data into the ESPHome device. A http request using an URL pointing to an image source or reenabling the REST api may be a suggestion.
+- **Support of animated GIFs is not implemented**  
+  I need to figure out how to decode GIF Files using existing ESPHome components.
 
-- **internal PNG and GIF to RGB converter**  
-  Unsing the OTA partition the ESP32 C3 Lite the compiled code is already eating about 84% of its flash size. Reaching 90% causes instability for unknown reasons. Because I do not want to skip the OTA functionality, I will have to upgrade to a ESP32 S3 with 8MB flash memory for further deveolpment.
+- **PNG support requires ESP32-S3 with PSRAM**  
+  Unsing the OTA partition the ESP32 C3 Lite the compiled code is already eating about 84% of its flash size. Reaching 90% causes instability for unknown reasons. I do not want to skip the OTA functionality! To use online image support an ESP32-S3-N16R8 is recommended (you can get them from ali for less tha 4€/piece). Please refer to the according yaml example.
 
 - **reverse engeneering of the play program feature**  
   A nice feature to queue image and text effects.
-
-
-
-
-
-
-
-
-
-
-
-
-
-

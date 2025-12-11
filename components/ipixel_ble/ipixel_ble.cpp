@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <ctime>
 
-#undef ESPHOME_LOG_LEVEL
-#define ESPHOME_LOG_LEVEL ESPHOME_LOG_LEVEL_DEBUG
+//#undef ESPHOME_LOG_LEVEL
+//#define ESPHOME_LOG_LEVEL ESPHOME_LOG_LEVEL_DEBUG
 #include "esphome/core/log.h"
 
 #ifdef USE_ESP32
@@ -76,18 +76,30 @@ void IPixelBLE::loop() {
 
       if (this->last_update_ + 5000 < tick) {
         this->last_update_ = tick;
-        load_gif_effect();  // loads a entire RGB frame, do not stress the BLE connection to much
+        //load_gif_effect();  // loads a entire RGB frame, do not stress the BLE connection to much
       }
     }
     queueTick();
   }
+  /*
+  if (state_.mEffectRestore) {
+    // restore last known effect
+    if (state_.mEffectPtr != nullptr) {
+      ESP_LOGD(TAG, "restoring effect"); 
+      state_.mEffectPtr->apply();
+    }
+    state_.mEffectRestore = false;
+  }
+  */
+
   // update sensors and numbers even tere is no connection
   update_state_(this->state_);
 }
 
 // display component
-void IPixelBLE::update() {
-  //ESP_LOGD(TAG, "display update called");
+void IPixelBLE::do_update_() {
+  ESP_LOGD(TAG, "display update called");
+  load_gif_effect();
 }
 
 void IPixelBLE::draw_absolute_pixel_internal(int x, int y, Color color) {
@@ -264,25 +276,10 @@ void IPixelBLE::on_notification_received(const std::vector<uint8_t> &data) {
   }
 }
 
-void IPixelBLE::control(const std::string &value) {
-  ESP_LOGD(TAG, "Text has been set: %s", value.c_str());
-  if (value.find("PNG:") == 0) {
-    state_.png_ = value.substr(4);
-    load_png_effect();
-  }
-  else if (value.find("GIF:") == 0) {
-    state_.gif_ = value.substr(4);
-    load_gif_effect();
-  } 
-  else {
-    state_.txt_ = value;
-    text_effect();
-  }
-}
-
 void IPixelBLE::write_state(light::LightState *state) {
-  if (!state->get_effect_name().compare("None")) state->set_flash_transition_length(0);
-  enum effects effect = static_cast<enum effects>(state->get_flash_transition_length());
+  if (!state->get_effect_name().compare("None")) {
+    state_.effect_ = None;
+  }
   float fbrightness, fred,  fgreen, fblue;
   state->set_gamma_correct(0.0);  // avoid gamma correction on RGB values
   state->current_values_as_brightness(&fbrightness);
@@ -300,10 +297,8 @@ void IPixelBLE::write_state(light::LightState *state) {
     state_.mPowerState = on;
     if (on) {
       queuePush( iPixelCommads::ledOn() );
-      // restore last known effect
-      effect = state_.mEffect;
-      //auto *effect = state->get_effect_by_index(state_.mEffectIndex);
-      //if (effect != nullptr) effect->apply(); 
+      state_.effect_ = state_.mEffect;
+      //state_.mEffectRestore = true;
     }
     else {
       queuePush( iPixelCommads::ledOff() );
@@ -331,13 +326,14 @@ void IPixelBLE::write_state(light::LightState *state) {
     queuePush( iPixelCommads::setBrightness( state_.mBrightness ) );
   }
   
-  if (state_.mEffect != effect || color_changed) {
+  if (state_.mEffect != state_.effect_ || color_changed) {
     if (state_.mEffect == Alarm) { // restore brightness
        queuePush( iPixelCommads::setBrightness( state_.mBrightness ) );
     }
-    state_.mEffect = effect;
-    //state_.mEffectIndex = state->get_current_effect_index();
-    switch (effect)
+    state_.mEffect = state_.effect_;
+    //state_.mEffectPtr = state->get_effect_by_index(state->get_current_effect_index());
+
+    switch (state_.effect_)
     {
       case None:
         queuePush(iPixelCommads::clear());  
@@ -353,8 +349,8 @@ void IPixelBLE::write_state(light::LightState *state) {
       case Message:
         text_effect();  
         break;
-      case LoadPNG:
-        load_png_effect();
+      case LoadImage:
+        load_image_effect();
         break;
       case LoadGIF:
         load_gif_effect();
@@ -466,7 +462,11 @@ void IPixelBLE::on_clock_style_number(float value) {
 }
 
 void IPixelBLE::on_slot_number_number(float value) {
-  state_.mSlotNumber = value;
+  if (state_.mSlotNumber != value) {
+    state_.mSlotNumber = value;
+    slot_number_number_->publish_state(value);
+    load_image_effect();
+  }
 }
 
 void IPixelBLE::on_annimation_mode_number(float value) {
@@ -561,16 +561,19 @@ void IPixelBLE::time_date_effect() {
   }
 }
 
-void IPixelBLE::load_png_effect() {
-  if (state_.mEffect == LoadPNG) {
-    queuePush( iPixelCommads::sendImage(Helpers::hexStringToVector(state_.png_)) );
+void IPixelBLE::load_image_effect(int8_t page) {
+  if (state_.mEffect == LoadImage) {
+    if (page > 0) {
+      state_.mSlotNumber = page;
+      slot_number_number_->publish_state(page);  
+    }
+    Display::do_update_(); // call display lambda writer
+    queuePush( iPixelCommads::sendImage( state_.framebuffer_ ) );
   }
 }
 
 void IPixelBLE::load_gif_effect() {
   if (state_.mEffect == LoadGIF) {
-    do_update_(); // call display lambda writer
-    queuePush( iPixelCommads::sendImage( state_.framebuffer_ ) );
   }
 }
 

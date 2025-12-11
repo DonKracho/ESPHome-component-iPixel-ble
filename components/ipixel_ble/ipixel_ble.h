@@ -11,6 +11,7 @@
 #include "esphome/components/esp32_ble_tracker/esp32_ble_tracker.h"
 #include "esphome/components/light/light_output.h"
 #include "esphome/components/light/light_state.h"
+#include "esphome/components/light/base_light_effects.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/number/number.h"
 #include "esphome/components/switch/switch.h"
@@ -65,18 +66,22 @@ private:
   };
 };
 
-class IPixelBLE :  public display::DisplayBuffer, public light::LightOutput, public ble_client::BLEClientNode, public text::Text {
+class IPixelBLE :  public display::DisplayBuffer, public light::LightOutput, public ble_client::BLEClientNode {
  public:
   IPixelBLE() {}
 
   void setup() override;
   void loop() override;
+  void show_image(int8_t page = -1) { load_image_effect(page); }
+  void set_text(std::string &text) { state_.txt_ = text; }
+  void set_effect(effects efect) { state_.effect_ = efect; }
   
   // display
-  void update() override;
+  //void update() override;
   int get_width_internal() override { return state_.mDisplayWidth; }
   int get_height_internal() override { return state_.mDisplayHeight; }
   display::DisplayType get_display_type() override { return display::DISPLAY_TYPE_COLOR; }
+  void update() {}
 
   // optional display parameters
   void set_display_width(uint16_t val) { state_.mDisplayWidth = val; }
@@ -96,9 +101,6 @@ class IPixelBLE :  public display::DisplayBuffer, public light::LightOutput, pub
     return traits;
   }
   void write_state(light::LightState *state);
-
-  // text
-  void control(const std::string &value);
 
   // Sensor setters
   void set_power_state(sensor::Sensor *sensor) { power_state_ = sensor; }
@@ -150,7 +152,7 @@ class IPixelBLE :  public display::DisplayBuffer, public light::LightOutput, pub
   void text_effect();
   void time_date_effect();
   void fill_color_effect();
-  void load_png_effect();
+  void load_image_effect(int8_t page = -1);
   void load_gif_effect();
   void fill_rainbow_effect();
   void random_pixel_effect();
@@ -159,6 +161,7 @@ class IPixelBLE :  public display::DisplayBuffer, public light::LightOutput, pub
   protected:
   void draw_absolute_pixel_internal(int x, int y, Color color) override;  // display
   void update_state_(const DeviceState &new_state);
+  void do_update_();
 
   uint16_t handle_{0};
   esp32_ble_tracker::ESPBTUUID service_uuid_ = esp32_ble_tracker::ESPBTUUID::from_raw("000000fa-0000-1000-8000-00805f9b34fb");

@@ -2,7 +2,7 @@ esphome:
   name: ipixel-ble
   friendly_name: LED Pixel Board
   libraries:
-    - https://github.com/donkracho/ErriezCRC32
+    - ErriezCRC32 = https://github.com/donkracho/ErriezCRC32
   on_boot:
     priority: 200  
     then:
@@ -46,14 +46,20 @@ font:
   - file: "gfonts://Roboto"
     id: roboto
     size: 16
+    glyphsets: GF_Latin_Core
+  - file: "gfonts://Roboto"
+    id: roboto_small
+    size: 12
+    glyphsets: GF_Latin_Core
 
 # required by ble_client    
 esp32_ble_tracker:
 
 ble_client:
   id: ble_client_id
+  # put the BLE MAC address of your device here
   mac_address: 0F:D6:54:F9:D2:C7  # 32x32
-#  mac_address: C3:AD:E7:8A:97:CA  # 16x92
+  #mac_address: C3:AD:E7:8A:97:CA  # 192x16
 
 ipixel_ble:
     id: ipixel_ble_id
@@ -64,40 +70,47 @@ display:
     rotation: 0
     #width: 32   # use a fixed value if device recognition fails
     #height: 32  # use a fixed value if device recognition fails
+    update_interval: never
     lambda: |-
-      auto red = Color(255, 0, 0);
-      auto green = Color(0, 255, 0);
-      auto blue = Color(0, 0, 255);
-      auto black = Color(0, 0, 0);
-      auto white = Color(255, 255, 255);
-      auto w = it.get_width();
-      auto h = it.get_height();
-      static int8_t page = 1; 
-      switch (page) {
-      case 1:
-        // to test some graphic functions draw a smiley
-        it.filled_circle(15, 15, 14, Color(255, 255, 0));
-        it.line(8, 20, 24, 20, red);
-        it.line(10, 21, 22, 21, red);
-        it.line(12, 22, 20, 22, red);
-        it.rectangle( 0, 0, 32, 32, blue);
-        it.filled_circle(9, 9, 5, white);
-        it.filled_circle(22, 9, 5, white);
-        it.filled_circle(10, 10, 2, Color(0, 0, 0));
-        it.filled_circle(23, 10, 2, Color(0, 0, 0));
-        break;
-      case 2:
-        it.filled_rectangle(0, 0, w, 6, red);
-        it.filled_rectangle(0, h-6, w, 6, red);
-        it.print(w/2, h/2, id(roboto), white, TextAlign::CENTER, id(text_id).state.c_str());
-        break;
-      default:
-        it.filled_ring(w/2, h/2, (h/2)-4, (h/2)-1, green);
-        it.printf(w/2, h/2, id(roboto), white, TextAlign::CENTER, "%d", page);
-        break;
-      }
-      page += 1;
-      if (page > 5 ) page = 1;
+          auto red = Color(255, 0, 0);
+          auto green = Color(0, 255, 0);
+          auto blue = Color(0, 0, 255);
+          auto black = Color(0, 0, 0);
+          auto white = Color(255, 255, 255);
+          auto w = it.get_width();
+          auto h = it.get_height();
+          int8_t index = id(slot_number).state;
+          switch (index) {
+          case 1:
+            // draw a simple smiley
+            it.filled_circle(15, 15, 14, Color(255, 255, 0));
+            it.line(8, 20, 24, 20, red);
+            it.line(10, 21, 22, 21, red);
+            it.line(12, 22, 20, 22, red);
+            it.rectangle( 0, 0, 32, 32, blue);
+            it.filled_circle(9, 9, 5, white);
+            it.filled_circle(22, 9, 5, white);
+            it.filled_circle(10, 10, 2, Color(0, 0, 0));
+            it.filled_circle(23, 10, 2, Color(0, 0, 0));
+            break;
+          case 2:
+            // draw text
+            it.filled_rectangle(0, 0, w, 6, red);
+            it.filled_rectangle(0, h-6, w, 6, red);
+            it.print(w/2, h/2, id(roboto), white, TextAlign::CENTER, id(text_id).state.c_str());
+            break;
+          case 3:
+            // show some sensor values
+            it.printf(w/2, h/4, id(roboto_small), blue, TextAlign::CENTER, "x:%0.0f", id(display_width).state);
+            it.printf(w/2, h/4*3, id(roboto_small), blue, TextAlign::CENTER, "y:%0.0f", id(display_height).state);
+            break;
+          default:
+            it.filled_ring(w/2, h/2, (h/2)-4, (h/2)-1, green);
+            it.printf(w/2, h/2, id(roboto), white, TextAlign::CENTER, "%d", index);
+            break;
+          }
+          //index += 1;
+          //if (index > 5 ) index = 1;
 
 light:
   - platform: ipixel_ble
@@ -106,44 +119,40 @@ light:
     default_transition_length: 0s
     initial_state:
       state: ON
-    restore_mode: RESTORE_DEFAULT_ON
+    restore_mode: RESTORE_AND_ON
     effects:
       - lambda:
           name: Time
           lambda: |-
-            id(control_id).set_flash_transition_length(1);
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::Time);
       - lambda:
           name: Time & Date
           lambda: |-
-            id(control_id).set_flash_transition_length(2);
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::TimeDate);
       - lambda:
           name: Message
           lambda: |-
-            id(control_id).set_flash_transition_length(3);
-      - lambda:
-          name: Load PNG
-          lambda: |-
-            id(control_id).set_flash_transition_length(4);
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::Message);
       - lambda:
           name: Load Lambda
           lambda: |-
-            id(control_id).set_flash_transition_length(5);
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::LoadImage);
       - lambda:
           name: Fill Color
           lambda: |-
-            id(control_id).set_flash_transition_length(6);
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::FillColor);
       - lambda:
           name: Fill Rainbow
           lambda: |-
-            id(control_id).set_flash_transition_length(7);
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::FillRainbow);
       - lambda:
           name: Random Pixels
           lambda: |-
-            id(control_id).set_flash_transition_length(8);
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::RandomPixels);
       - lambda:
           name: Alarm
           lambda: |-
-            id(control_id).set_flash_transition_length(9);
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::Alarm);
 
 sensor:
   - platform: ipixel_ble
@@ -183,10 +192,9 @@ number:
       id: clock_style
       icon: mdi:clock-digital
     slot_number:
-      name: "Slot Number"
+      name: "Lambda Slot"
       id: slot_number
       icon: mdi:numeric-1-box-multiple-outline
-      internal: true
     annimation_mode:
       name: "Annimation Mode"
       id: annimation_mode
@@ -222,20 +230,18 @@ switch:
       internal: true
 
 text:
-  - platform: ipixel_ble
-    name: Data
-    id: data_id
-    mode: text
-    #optimistic: true
-    icon: "mdi:keyboard-settings-outline"
-    #just for testing lambda prints
   - platform: template 
-    name: Lambda
+    name: Text or Image URL
     id: text_id
     mode: text
-    initial_value: "Hi5"
+    initial_value: "Zwölf Boxkämpfer jagen Viktor quer über den großen Sylter Deich 1234567890"
     optimistic: true
     icon: "mdi:keyboard-settings-outline"
+    update_interval: never
+    on_value:
+      - lambda: |-
+          id(ipixel_ble_id).set_text(x);
+          id(ipixel_ble_id).show_image(2);
 
 time:
   - platform: homeassistant
