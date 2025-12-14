@@ -17,9 +17,9 @@ struct text_command {
   uint8_t  animation_mode                // byte 20
   uint8_t  animation_speed;              // byte 21
   uint8_t  char_rainbow_mode;            // byte 22
-  uint8_t  char_color[3];	               // byte 23-25 character color {r, g, b} applies when rainbow mode set to 1
+  uint8_t  char_color[3];	             // byte 23-25 character color {r, g, b} applies when rainbow mode set to 1
   uint8_t  back_rainbow_mode;            // byte 26
-  uint8_t  back_color[3];	               // byte 27-29 background color {r, g, b} applies when rainbow mode set to 1
+  uint8_t  back_color[3];	             // byte 27-29 background color {r, g, b} applies when rainbow mode set to 1
   union {
     struct 8_16 {                        // fixed 8x16 font bitmap
       uint8_t flag {0x00};
