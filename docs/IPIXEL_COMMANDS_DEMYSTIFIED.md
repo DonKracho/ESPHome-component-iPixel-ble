@@ -10,7 +10,8 @@ It has attributes for animation and global colors. Tor
 ```
 struct text_command {
   uint16_t cmd_len;                      // byte 1-2 little endian
-  uint8_t  fixed1[] {0x00, 0x01, 0x00};  // byte 3-5 preamble  
+  uint8_t  cmd_id[2] {0x00, 0x01};       // byte 3-4 command identifier
+  uint8_t  has_next_chunk {0x00};        // byte 5 set to 2 if there is a data frame following (@ArtiiP)
   uint16_t cmd_len - 0x0f;               // byte 6-7 maybe a deprecated text command not knowing all attributes
   uint8_t  fixed2[] {0x00, 0x00};        // byte 8-9
   uint32_t crc;                          // byte 10-13 checksum of payload little endian
@@ -18,7 +19,8 @@ struct text_command {
   uint8_t  save_slot;                    // byte 15 used by program feature
                                          // here the payload starts
   uint16_t char_count;                   // byte 16-17 little endian
-  uint8_t  fixed[2] {0x01, 0x01};        // byte 18-19 some kind of place holders?
+  uint8_t  h_align {0x01};               // byte 18 set to 1 for horizontal alignment (@ArtiiP)
+  uint8_t  v_align {0x01};               // byte 19 set to 1 for vertical alignment (@ArtiiP)
   uint8_t  animation_mode                // byte 20
   uint8_t  animation_speed;              // byte 21
   uint8_t  rainbow_mode;                 // byte 22
@@ -101,11 +103,11 @@ It returns a notification
 
 ```
 struct  versions {  
-  uint16_t cmd_len {0x0800};             // byte 1-2 little endian  
+  uint16_t data_len {0x0c00};            // byte 1-2 little endian  
   uint8_t  cmd_id[2] {0x05, 0x80};       // byte 3-4 command identifier  
-  uint8_t  mcu_major                     // byte 3-4 command identifier  
-  uint8_t  mcu_minor;                    // byte 3-4 command identifier  
-  uint8_t  ble_major;                    // byte 3-4 command identifier  
-  uint8_t  ble_minor;                    // byte 3-4 command identifier  
+  uint8_t  mcu_major                     // byte 5-6
+  uint8_t  mcu_minor;                    // byte 7-8
+  uint8_t  ble_major;                    // byte 9-10
+  uint8_t  ble_minor;                    // byte 11-12
 };
 ```
