@@ -12,7 +12,7 @@ struct text_command {
   uint16_t cmd_len;                      // byte 1-2 entire packet length little endian
   uint8_t  cmd_id[2] {0x00, 0x01};       // byte 3-4 command identifier
   uint8_t  has_next_chunk {0x00};        // byte 5 set to 0x02, if there is a data frame following (@ArtiiP)
-  uint32_t payload_size;                 // byte 6-9 maybe a deprecated text command not knowing all attributes
+  uint32_t payload_size;                 // byte 6-9
   uint32_t payload_crc;                  // byte 10-13 checksum of payload little endian
   uint8_t  unknown {0x00};               // byte 14
   uint8_t  save_slot;                    // byte 15 used by program feature
@@ -111,9 +111,8 @@ struct  versions {
 };
 ```
 
-### send image  
-The iPixel App can send raw franes png or gif files. If the file exceed 13 KB in size it
-has to be sent in chunks,
+### Send Image  
+The iPixel App can send raw frames, png or gif files. If the image size exceeds 12KB it has to be send in chunks.
 
 ```
 struct  send_image {
