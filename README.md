@@ -5,7 +5,7 @@
 This repository contains an ESPHome external component that enables control of a Bluetooth‐enabled iPixel Display. It is non intrusive - no modification of the display is required. It just emulates the known iPixel Color App commands. At least ESPHome version 2025.11.0 is required.
 
 ## Update 2025/17/12
-code cleanup and support of Proram List feature
+code cleanup and support of Program List feature
 
 ## Update 2025/10/12
 Using an ESP32-S3-N16R8 module now online PNG, JPG and BMP files can be loaded and displayed. Just switch to te Load Image effect and copy the URL of an online image into the data text field. The images get resized to 32x32. Due to the limited resources even of an ESP32-S3 it is recommended to use small images only. This will keep loading times short and prevents the module from running out of memory or crashing in worst case.
