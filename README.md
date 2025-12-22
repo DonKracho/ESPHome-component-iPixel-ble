@@ -6,7 +6,7 @@ This repository contains an ESPHome external component that enables control of a
 
 ## Update 2025/22/12
 **Breaking Change:** With implementing http requests the ESP32-C3 module runs out of resources. The C3 support has stopped now. If you still want to use the C3 refer to the ESP32-C3 tag.  
-Now it is possible to load online gif files. The native gif support of the device is used.  I testd up to a size of 500KB, but 'large' files will take minutes to load. Gif animation up to 32 KB do load in a reasonable time.
+Now it is possible to load online gif files. The native gif support of the device is used.  I tested animated gif files up to a size of 500KB. be aware that 'large' files may take in minute range to load. Gif animations up to size of 32KB will load in a reasonable time.
 
 ## Update 2025/17/12
 code cleanup and support of Program List feature
