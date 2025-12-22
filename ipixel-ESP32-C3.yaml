@@ -38,8 +38,7 @@ wifi:
   password: !secret wifi_password
 
 external_components:
-  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices/components
-  #- source: D:\ESPHome-external-component-for-iPixel-ble-devices\components
+  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices/tree/main/components[@ESP23-C3]
     refresh: 0s
     components: [ipixel_ble]
 

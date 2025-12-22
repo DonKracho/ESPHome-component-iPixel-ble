@@ -7,7 +7,7 @@ from esphome.const import CONF_ID
 
 
 CODEOWNERS = ["@donkracho"]
-#DEPENDENCIES = ["http_request"]
+DEPENDENCIES = ["http_request"]
 
 ESPHOME_MIN_VERSION = "2025.11.0"
 CONF_IPIXEL_BLE = "ipixel_ble"
@@ -25,7 +25,7 @@ CONFIG_ESPS3_PSRAM = cv.Schema({
 })
 
 CONFIG_SCHEMA = (
-    CONFIG_ESPC3
+    CONFIG_ESPS3_PSRAM
     .extend(cv.COMPONENT_SCHEMA)
     .extend(ble_client.BLE_CLIENT_SCHEMA)
     .extend({cv.Optional(""): cv.validate_esphome_version(ESPHOME_MIN_VERSION)})
@@ -36,4 +36,4 @@ async def to_code(config):
     await cg.register_component(var, config)
     await ble_client.register_ble_node(var, config)
     if http := config.get(CONF_HTTP_REQUEST_ID):
-      await cg.register_parented(var, config[http])
+      await cg.register_parented(var, config[CONF_HTTP_REQUEST_ID])
