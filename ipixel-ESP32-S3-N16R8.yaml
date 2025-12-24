@@ -26,7 +26,7 @@ esp32:
 logger:
   baud_rate: 115200
   hardware_uart: UART0
-  level: WARN
+  level: INFO
 
 # pngle requires a lot of ram this is the setting for an  ESP32-S3-N16R8
 psram:
@@ -83,8 +83,8 @@ esp32_ble_tracker:
 ble_client:
   id: ble_client_id
   # put the BLE MAC address of your device here
-  mac_address: 0F:D6:54:F9:D2:C7  # 32x32
-  #mac_address: C3:AD:E7:8A:97:CA  # 96x16
+  #mac_address: 0F:D6:54:F9:D2:C7  # 32x32
+  mac_address: C3:AD:E7:8A:97:CA  # 96x16
 
 ipixel_ble:
     id: ipixel_ble_id
@@ -108,6 +108,12 @@ display:
           int8_t index = id(lambda_slot).state;
           switch (index) {
           case 0:
+            // draw text
+            it.filled_rectangle(0, 0, w, 6, red);
+            it.filled_rectangle(0, h-6, w, 6, red);
+            it.print(w/2, h/2, id(roboto), white, TextAlign::CENTER, id(text_id).state.c_str());
+            break;
+          case 1:
             // draw a simple smiley
             it.filled_circle(15, 15, 14, Color(255, 255, 0));
             it.line(8, 20, 24, 20, red);
@@ -118,12 +124,6 @@ display:
             it.filled_circle(22, 9, 5, white);
             it.filled_circle(10, 10, 2, Color(0, 0, 0));
             it.filled_circle(23, 10, 2, Color(0, 0, 0));
-            break;
-          case 1:
-            // draw text
-            it.filled_rectangle(0, 0, w, 6, red);
-            it.filled_rectangle(0, h-6, w, 6, red);
-            it.print(w/2, h/2, id(roboto), white, TextAlign::CENTER, id(text_id).state.c_str());
             break;
           case 2:
             // show some sensor values
@@ -193,6 +193,14 @@ light:
           name: Fill Rainbow
           lambda: |-
             id(ipixel_ble_id).set_effect(ipixel_ble::effects::FillRainbow);
+      - lambda:
+          name: Rhythm Animation
+          lambda: |-
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::RhythmAnimation);
+      - lambda:
+          name: Rhythm Levels
+          lambda: |-
+            id(ipixel_ble_id).set_effect(ipixel_ble::effects::RhythmLevels);
       - lambda:
           name: Random Pixels
           lambda: |-
@@ -317,7 +325,7 @@ text:
           } else {
             ESP_LOGD("text_id", "no image extention found, setting text");
             id(ipixel_ble_id).set_text(x);
-            if (id(play_switch).state == 0) id(ipixel_ble_id).show_image(1);
+            if (id(play_switch).state == 0) id(ipixel_ble_id).show_image(0);
           }
 
 time:

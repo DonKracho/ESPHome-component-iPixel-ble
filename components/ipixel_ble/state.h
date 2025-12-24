@@ -16,6 +16,8 @@ enum effects {
     LoadGIF,
     FillColor,
     FillRainbow,
+    RhythmAnimation,
+    RhythmLevels,
     RandomPixels,
     Alarm
 };

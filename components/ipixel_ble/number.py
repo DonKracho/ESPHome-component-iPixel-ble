@@ -53,7 +53,7 @@ async def to_code(config):
         await cg.register_parented(b, parent)
         cg.add(getattr(parent, f"set_{CONF_ANNIMATION_MODE}_number")(b))
     if conf := config.get(CONF_ANNIMATION_SPEED):
-        b = await number.new_number(conf, min_value=0, max_value=100, step=5)
+        b = await number.new_number(conf, min_value=0, max_value=100, step=1)
         await cg.register_parented(b, parent)
         cg.add(getattr(parent, f"set_{CONF_ANNIMATION_SPEED}_number")(b))
     if conf := config.get(CONF_FONT_FLAG):

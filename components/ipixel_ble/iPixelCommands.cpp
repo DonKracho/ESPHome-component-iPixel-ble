@@ -36,6 +36,11 @@ namespace iPixelCommads {
         return frame;
     }
 
+    std::vector<uint8_t> getFirmwareVersions() {
+        std::vector<uint8_t> result {0x04, 0x00, 0x05, 0x80};
+        return result;
+    }
+
     std::vector<uint8_t> setFunMode(bool value) {
         std::vector<uint8_t> frame(5);
         frame[0] = 0x05;
@@ -83,14 +88,15 @@ namespace iPixelCommads {
         return frame;
     }
 
-    std::vector<uint8_t> setSpeed(int speed) {
+    std::vector<uint8_t> setSpeed(int speed) {      // ATTENTION: malformed command
         checkRange("Speed", speed, 0, 100);
 
         std::vector<uint8_t> frame(4);
         frame[0] = 0x05;
         frame[1] = 0x00;
         frame[2] = 0x03;
-        frame[3] = (uint8_t)speed;
+        frame[3] = 0x80;
+        frame[4] = (uint8_t)speed;
 
         return frame;
     }
@@ -106,7 +112,7 @@ namespace iPixelCommads {
         return frame;
     }
 
-    std::vector<uint8_t> setPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+    std::vector<uint8_t> showPixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
         checkRange("X", x, 0, 255);
         checkRange("Y", y, 0, 255);
         checkRange("R", r, 0, 255);
@@ -128,7 +134,7 @@ namespace iPixelCommads {
         return frame;
     }
 
-    std::vector<uint8_t> setClockMode(int style, int dayOfWeek, int year, int month, int day, bool showDate, bool format24) {
+    std::vector<uint8_t> showClock(int style, int dayOfWeek, int year, int month, int day, bool showDate, bool format24) {
         checkRange("Style", style, 1, 9);
         checkRange("Day of Week", dayOfWeek, 1, 7);
         checkRange("Year", year, 0, 99);
@@ -151,7 +157,7 @@ namespace iPixelCommads {
         return frame;
     }
 
-    std::vector<uint8_t> setRhythmLevelMode(int style, const int levels[11]) {
+    std::vector<uint8_t> showRhythmLevels(int style, const int levels[11]) {
         checkRange("Style", style, 0, 4);
         for (int i = 0; i < 11; i++) checkRange("Level", levels[i], 0, 15);
 
@@ -167,7 +173,7 @@ namespace iPixelCommads {
         return frame;
     }
 
-    std::vector<uint8_t> setRhythmAnimationMode(int style, int frameNumber) {
+    std::vector<uint8_t> showRhythmAnimation(int style, int frameNumber) {
         checkRange("Style", style, 0, 1);
         checkRange("Frame", frameNumber, 0, 7);
 
@@ -182,7 +188,7 @@ namespace iPixelCommads {
         return frame;
     }
 
-    std::vector<uint8_t> sendText(const std::string &text, uint8_t animation, uint8_t speed, esphome::Color txt_color,  uint8_t rainbow_mode, uint8_t font_flag, uint8_t save_slot, esphome::Color bg_color) {
+    std::vector<uint8_t> showText(const std::string &text, uint8_t animation, uint8_t speed, esphome::Color txt_color,  uint8_t rainbow_mode, uint8_t font_flag, uint8_t save_slot, esphome::Color bg_color) {
         checkRange("Text Length", text.length(), 1, 500);
         checkRange("Animation", animation, 0, 6);
         checkRange("Save Slot", save_slot, 0, 255);
@@ -243,7 +249,7 @@ namespace iPixelCommads {
         return result;
     }
 
-    std::vector<uint8_t> sendImage(const std::vector<uint8_t> &data, uint8_t save_slot, uint8_t chunk_index, bool is_gif,
+    std::vector<uint8_t> showImage(const std::vector<uint8_t> &data, uint8_t save_slot, uint8_t chunk_index, bool is_gif,
                                    size_t total_size, std::vector<uint8_t> total_crc) {
         size_t size = data.size();
         size_t max_size = 12*1024L;
@@ -283,7 +289,7 @@ namespace iPixelCommads {
         return result;
     }
 
-    std::vector<uint8_t> startProgramList(const std::vector<uint8_t> &slot_list) {
+    std::vector<uint8_t> setProgramList(const std::vector<uint8_t> &slot_list) {
         std::vector<uint8_t> result;
 
         int16_t list_size = slot_list.size();
@@ -301,7 +307,7 @@ namespace iPixelCommads {
         return result;
     }
 
-    std::vector<uint8_t> deleteSlotList(const std::vector<uint8_t> &slot_list) {
+    std::vector<uint8_t> delProgramList(const std::vector<uint8_t> &slot_list) {
         std::vector<uint8_t> result;
 
         int16_t list_size = slot_list.size();
@@ -322,15 +328,9 @@ namespace iPixelCommads {
     std::vector<uint8_t> deleteSlot(uint8_t slot) {
         checkRange("Slot", slot, 1, 100);
 
-        std::vector<uint8_t> frame {0x07, 0x00, 0x02, 0x01, 0x01, 0x00};
-        frame.push_back(slot);
+        std::vector<uint8_t> slot_list {slot};
 
-        return frame;
-    }
-
-    std::vector<uint8_t> notifyFirmwareVersions() {
-        std::vector<uint8_t> result {0x04, 0x00, 0x05, 0x80};
-        return result;
+        return delProgramList(slot_list);
     }
 
 } // namespace iPixelCommads

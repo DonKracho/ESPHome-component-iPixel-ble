@@ -276,8 +276,12 @@ protected:
   void load_image_effect(int8_t page = -1);
   void load_gif_effect();
   void fill_rainbow_effect();
+  void rhythm_animation_effect();
+  void rhythm_levels_effect();
   void random_pixel_effect();
   void alarm_effect();
+
+  float frand() { return (float) rand() / RAND_MAX; }
 
   void draw_absolute_pixel_internal(int x, int y, Color color) override;  // display
  

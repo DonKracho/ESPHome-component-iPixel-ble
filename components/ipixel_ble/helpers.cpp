@@ -1,5 +1,6 @@
 #include "Helpers.h"
-#include <esp_log.h>
+#include "esphome/core/log.h"
+
 
 namespace Helpers {
 
@@ -469,9 +470,9 @@ const uint8_t font_MORSEKP800_8x16[4096] = {
                         //row_debug += (line_data[i] & bit) ? 'X' : '-';
                     //}
 				}
-                //ESP_LOGD(TAG, "%s", row_debug.c_str());
+                //ESP_LOGV(TAG, "%s", row_debug.c_str());
             }
-            //ESP_LOGD(TAG, "");
+            //ESP_LOGV(TAG, "");
             
             // Apply original transformations
             char_bytes = Helpers::invertFrames(char_bytes);
