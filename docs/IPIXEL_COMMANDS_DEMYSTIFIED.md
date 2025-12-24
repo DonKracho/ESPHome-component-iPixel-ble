@@ -84,7 +84,7 @@ To remove slots from the program list the delete_list_command ist used. This tak
 **Return:** a 5 byte acknowledge notification with state 1 
  
 ```
-struct delete_list {  
+struct del_program_list {  
   uint16_t cmd_len;                     // byte 1-2 entire packet length little endian  
   uint8_t  cmd_id[2] {0x02, 0x01};      // byte 3-4 command identifier  
   uint16_t slot_count;                  // byte 5-6 number of slots little endian  
@@ -201,7 +201,7 @@ shows a rhythm animation.\
 **NOTE:** This command does not send an acknowledge notification.
  
 ```
-struct set_rhythm_animation {  
+struct show_rhythm_animation {  
   uint16_t cmd_len {0x06, 0x00};        // byte 1-2 entire packet length little endian  
   uint8_t  cmd_id[2] {0x00, 0x02};      // byte 3-4 command identifier  
   uint8_t  animation_number;            // value: 0-7
@@ -223,11 +223,11 @@ struct show_rhythm_level {
 ```
 
 ### Show Pixel  
-draws a single pixel on the display with given color. the origin is the upper left corner. Used for DIY drawing mode.\
+draws a single pixel on the display with given color. The origin is the upper left corner. Used for DIY drawing mode.\
 **NOTE:** This command does not send an acknowledge notification.
 
 ```
-struct set_pixel {  
+struct show_pixel {  
   uint16_t cmd_len {0x0a, 0x00};        // byte 1-2 entire packet length little endian  
   uint8_t  cmd_id[2] {0x05, 0x01};      // byte 3-4 command identifier  
   uint8_t  fixed {0x00};				// byte 5  (maybe it allows 0x02 like image or text)
@@ -291,7 +291,7 @@ sets the speed of animations, e.g. scrolling test
 ```
 struct set_speed {  
   uint16_t cmd_len {0x05, 0x00};        // byte 1-2 entire packet length little endian  
-  uint8_t  cmd_id[2] {0x03, 0x80};      // byte 3-4 command identifier  
+  uint8_t  cmd_id[2] {0x03, 0x01?};     // byte 3-4 command identifier  
   uint8_t  speed;                       // byte 5 value. 0-100  
 };
 ```
