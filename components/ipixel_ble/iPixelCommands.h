@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Helpers.h"
+#include "helpers.h"
 #include "esphome/core/color.h"
 
 /**
