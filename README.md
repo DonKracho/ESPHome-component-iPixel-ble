@@ -1,4 +1,4 @@
-![Made for ESPHome](https://raw.githubusercontent.com/DonKracho/ESPHome-configurations/06cc01772bdb5ab3a25a72783a457e18d9daf7df/made-for-esphome-black-on-white.svg)
+![Made for ESPHome]((https://raw.githubusercontent.com/DonKracho/ESPHome-configurations/refs/heads/main/made-for-esphome-black-on-white.svg)
 
 ## EESPHome Integration for a LED Pixel Board
 
@@ -126,6 +126,7 @@ The BLE stack occupies a significant amount of flash memory. Combined with sever
   
 - **PNG and GIF support requires an ESP32-S3 with PSRAM**  
   Unsing the OTA partition the ESP32 C3 Lite the compiled code is already eating about 88% of its flash size. Reaching 90% causes instability for unknown reasons. I do not want to skip the OTA functionality! It loads a new firmware much faster than via the serial port. To use online image support an ESP32-S3-N16R8 is recommended (you can get them from ali for less than 4€/piece). Please refer to the according yaml example.
+
 
 
 
