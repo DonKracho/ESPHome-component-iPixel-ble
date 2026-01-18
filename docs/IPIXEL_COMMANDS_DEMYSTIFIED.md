@@ -1,5 +1,7 @@
 ## iPixel BLE command stucture  
 
+also refer to: [protocol reverse engineering by cagcoach](https://github.com/cagcoach/ha-ipixel-color/blob/main/iPIXEL-Protocol-Documentation.md)
+
 All commads send to the display start with the command package length encoded as 2 byte little endian followed by a fixed two byte command identifier. If the command payload size exceeds 12KB it is split up into subsequent commads with up to 12 KB payload chunks. This may happen for large gif animations and text only. All commands, exept the commands for setting pixel and rhythm, return an acknowledge notification.
 
 ### Set Time (and getting display size)
@@ -230,7 +232,7 @@ draws a single pixel on the display with given color. The origin is the upper le
 struct show_pixel {  
   uint16_t cmd_len {0x0a, 0x00};        // byte 1-2 entire packet length little endian  
   uint8_t  cmd_id[2] {0x05, 0x01};      // byte 3-4 command identifier  
-  uint8_t  fixed {0x00};				// byte 5  (maybe it allows 0x02 like image or text)
+  uint8_t  fixed {0x00};                // byte 5  (maybe it allows 0x02 like image or text)
   uint8_t  red;                         // byte 6  value: 0-255
   uint8_t  green;                       // byte 7  value: 0-255
   uint8_t  blue;                        // byte 8  value: 0-255
@@ -239,7 +241,7 @@ struct show_pixel {
 };
 ```
 
-### Cear  
+### Clear (reset screen) 
 clears all slots in the eeprom storage. The initial LED image gets displayed.\
 **Return:** a 5 byte acknowledge notify with state 1
 
