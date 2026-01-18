@@ -82,8 +82,8 @@ and figured out most of the BLE protocol required.
   An ESP32 S3 Port using a REST API supporting all stuff known right now.
   Unfortunately some comands did fail with my display.
 
-- **[cagcoach/ha-ipixel-color](https://github.com/cagcoach/ha-ipixel-color)**
-  A direct HACS HomesAistant approach (I'll give it a try too)
+- **[cagcoach/ha-ipixel-color](https://github.com/cagcoach/ha-ipixel-color)**  
+  A direct HACS HomesAistant approach and extensive command documentation (I'll give it a try too).
 
 - **[Erriez/ErriezCRC32](https://github.com/Erriez/ErriezCRC32)**  
   A small and efficient CRC32 checksum calculator. Right now it is restricted for arduino use only, but there are no dependencies to the arduino framework. For convenience I copied the two source code files directly into the component/ipixel-ble folder.
