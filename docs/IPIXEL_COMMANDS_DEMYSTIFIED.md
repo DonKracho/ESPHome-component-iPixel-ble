@@ -5,7 +5,7 @@ also refer to: [protocol reverse engineering by cagcoach](https://github.com/cag
 All commads send to the display start with the command package length encoded as 2 byte little endian followed by a fixed two byte command identifier. If the command payload size exceeds 12KB it is split up into subsequent commads with up to 12 KB payload chunks. This may happen for large gif animations and text only. All commands, exept the commands for setting pixel and rhythm, return an acknowledge notification.
 
 ### Set Time (and getting display size)
-This is the first command send to the divice by the iPixel Color App after the BLE connections has been established.\
+This is the first command send to the divice by the iPixel Color App after the BLE connection has been established.\
 **Return:** a 11 byte acknowledge notification with display model encoded in byte 5. 
  
 ```
@@ -66,8 +66,8 @@ struct show_digital_clock {
 ### Set Program List  
 The iPixel Color App has a "Program List" feature. There you can checkmark within a list of effects stored on the mobile already. On pressing the Play button all checked effects are send to the display and shown in a endless sequence loop.\
 
-When pressing the play button in the "Program List" feature tab the follwing command is send to the dispaly. As always the command starts with the command length byte count encoded as two byte little endian.A fixed two byte command identifier follows. Then the length of the slot list as two byte little endian. A list of slot numbers involved follows. The nunbers may have a value range from 1 to 100, at least for my devices.\
-Slot nunbers 0 and numbers above 100 are reserved. For these numbers the uploaded effects are applied immediately and the progam list halts.\
+When pressing the play button in the "Program List" feature tab the set_program_list command is send to the dispaly. As always, the command starts with the command length byte count encoded as two byte little endian. A fixed two byte command identifier follows. Then the length of the slot list as two byte little endian. The list of slot numbers involved follows. The nunbers may have a value range from 1 to 100, at least for my devices.\
+Slot nunbers 0 and numbers above 100 are reserved. For these numbers the uploaded effects are applied immediately and the progam list execution halts.\
 **Return:** a 5 byte acknowledge notification with state 1 
 
 ```
@@ -82,7 +82,7 @@ struct set_program_list {
 After that for each slot number in the list the according effect (load image or sending text) has to be send. As long as not all effects have been set the display cycle trough all slots having valid content. While the program list is loading do not send commands which are not taking a slot number. Be carefull: Sending invalid content to a slot may crash the display and cause boot loops!
 
 ### Delete Program List (aka Delete Slot/Screen)  
-To remove slots from the program list the delete_list_command ist used. This takes a list of numbers too. Be carefull deleting slots while the program list upload is not finished. This may crash the display firmware.\
+To remove slots from the program list the del_program_list command is used. This takes a list of numbers too. Be carefull deleting slots while the program list upload is not finished. This may crash the display firmware.\
 **Return:** a 5 byte acknowledge notification with state 1 
  
 ```

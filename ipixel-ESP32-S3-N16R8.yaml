@@ -61,7 +61,7 @@ web_server:
   port: 80
 
 external_components:
-  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices/components
+  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices/components[@main]
   #- source: D:\ESPHome-external-component-for-iPixel-ble-devices\components
     refresh: 0s
     components: [ipixel_ble]
