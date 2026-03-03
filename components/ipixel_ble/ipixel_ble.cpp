@@ -803,10 +803,13 @@ bool IPixelBLE::is_starting() {
 
 void IPixelBLE::downloadTick() {
 #ifdef HAS_PSRAM
+  static uint8_t slot = 0;
   if (buffer_.is_valid() && upload_queue_->state == 0) {
-    uint8_t slot = get_slot();
     uint8_t index;
     const std::vector<uint8_t> data = buffer_.get_chunk(index);
+    if (index == 0) {
+      slot = get_slot();
+    }
     if (data.size() > 0) {
       upload_queue_->publish_state(1);
       queuePush( iPixelCommads::showImage(data, slot, index, true, buffer_.get_size(), buffer_.get_crc()) );

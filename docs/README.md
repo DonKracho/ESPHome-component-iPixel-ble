@@ -101,91 +101,115 @@ Click on the text "Control" of the RGB light component to open detailed settings
 
 ### HomeAssistant scripting
 
-Example for setting the LED pixel bord to default:
-```
-script:
-  sequence:
-  - action: light.turn_on
-    metadata: {}
-    data:
-      brightness_pct: 20
-      effect: Time
-    target:
-      entity_id: light.ipixel_ble_display
-  alias: iPixel Default
-  description: 'set the LED pixel board defaults'
-```
+You can put images to the /config/www folder and access them via the URL http://<HA IP>:8123/local/...  
 
-Example for displaying a program list:
+Example for an animation:
 ```
-script:
-  sequence:
-  - action: light.turn_on
-    metadata: {}
-    data:
-      effect: Time
-      rgb_color:
-        - 255
-        - 0
-        - 0
-    target:
-      entity_id: light.ipixel_stripe_control
-  - device_id: a1727ee4b5abe85afc26d8e1e5198567
-    domain: number
-    entity_id: number.ipixel_stripe_annimation_speed
-    type: set_value
-    value: 90
-  - type: turn_off
-    device_id: a1727ee4b5abe85afc26d8e1e5198567
-    entity_id: switch.ipixel_stripe_program_list
-    domain: switch
-  - device_id: a1727ee4b5abe85afc26d8e1e5198567
-    domain: text
-    entity_id: text.ipixel_stripe_text_or_image_url
-    type: set_value
-    value: 1 2 3.lst
-  - type: turn_on
-    device_id: a1727ee4b5abe85afc26d8e1e5198567
-    entity_id: switch.ipixel_stripe_program_list
-    domain: switch
-  - device_id: a1727ee4b5abe85afc26d8e1e5198567
-    domain: text
-    entity_id: text.ipixel_stripe_text_or_image_url
-    type: set_value
-    value: >-
-      https://img.favpng.com/22/16/11/yellow-heart-yellow-smiling-heart-emoticon-with-blushing-cheeks-Za0kGyFt.jpg
-  - wait_template: "{{ states('sensor.ipixel_stripe_upload_queue') | int == 0 }}"
-    continue_on_timeout: true
-    timeout: "00:00:10.000"
-  - device_id: a1727ee4b5abe85afc26d8e1e5198567
-    domain: text
-    entity_id: text.ipixel_stripe_text_or_image_url
-    type: set_value
-    value: 0 0 0.bgc
-  - device_id: a1727ee4b5abe85afc26d8e1e5198567
-    domain: text
-    entity_id: text.ipixel_stripe_text_or_image_url
-    type: set_value
-    value: Und hier kommt ein Karton
-  - wait_template: "{{ states('sensor.ipixel_stripe_upload_queue') | int == 0 }}"
-    continue_on_timeout: true
-    timeout: "00:00:01.000"
-  - device_id: a1727ee4b5abe85afc26d8e1e5198567
-    domain: text
-    entity_id: text.ipixel_stripe_text_or_image_url
-    type: set_value
-    value: 255 255 255.col
-  - device_id: a1727ee4b5abe85afc26d8e1e5198567
-    domain: text
-    entity_id: text.ipixel_stripe_text_or_image_url
-    type: set_value
-    value: 128 128 0.bgc
-  - device_id: a1727ee4b5abe85afc26d8e1e5198567
-    domain: text
-    entity_id: text.ipixel_stripe_text_or_image_url
-    type: set_value
-    value: Ende im Gelände
-alias: ipixel program
+alias: LED Pixel Stripe Meldung
 description: ""
+triggers:
+  - trigger: state
+    entity_id:
+      - input_text.meldung
+conditions: []
+actions:
+  - action: script.led_pixel_stripe
+    data:
+      message: "{{ states('input_text.meldung') | string }}"
+      url: http://192.168.0.254:8123/local/images/64x20/gif/animated/tetris2.gif
+mode: single
+```
 
+Example for displaying a program list script:
+```
+alias: LED Pixel Stripe
+description: Meldung auf LED Pixel Stripe ausgeben
+mode: single
+fields:
+  message:
+    name: Meldung
+    description: message to display
+    selector:
+      text: null
+    default: ""
+  url:
+    name: Bild
+    description: image to display
+    selector:
+      text: null
+    default: ""
+sequence:
+  - if:
+      - condition: template
+        value_template: "{{ message | string != '' }}"
+    then:
+      - action: switch.turn_off
+        data:
+          entity_id: switch.led_pixel_stripe_program_list
+      - action: light.turn_on
+        data:
+          brightness_pct: 100
+          effect: None
+        target:
+          entity_id: light.led_pixel_stripe_control
+      - action: number.set_value
+        target:
+          entity_id: number.led_pixel_stripe_annimation_speed
+        data:
+          value: "100"
+      - action: text.set_value
+        data:
+          value: 255 0 0.col
+        target:
+          entity_id: text.led_pixel_stripe_text_or_image_url
+      - if:
+          - condition: template
+            value_template: "{{ url | string == '' }}"
+        then:
+          - action: text.set_value
+            data:
+              value: 1.lst
+            target:
+              entity_id: text.led_pixel_stripe_text_or_image_url
+          - action: switch.turn_on
+            data:
+              entity_id: switch.led_pixel_stripe_program_list
+          - action: text.set_value
+            data:
+              value: "{{ message | string }}"
+            target:
+              entity_id: text.led_pixel_stripe_text_or_image_url
+        else:
+          - action: text.set_value
+            data:
+              value: 1 2.lst
+            target:
+              entity_id: text.led_pixel_stripe_text_or_image_url
+          - delay: "00:00:01"
+          - action: switch.turn_on
+            data:
+              entity_id: switch.led_pixel_stripe_program_list
+          - action: text.set_value
+            data:
+              value: "{{ message | string }}"
+            target:
+              entity_id: text.led_pixel_stripe_text_or_image_url
+          - wait_template: "{{ states('sensor.led_pixel_stripe_upload_queue') | int == 0 }}"
+            continue_on_timeout: true
+            timeout: "00:00:10"
+          - action: text.set_value
+            data:
+              value: "{{ url | string }}"
+            target:
+              entity_id: text.led_pixel_stripe_text_or_image_url
+          - wait_template: "{{ states('sensor.led_pixel_stripe_upload_queue') | int == 0 }}"
+            continue_on_timeout: true
+            timeout: "00:00:10"
+    else:
+      - action: light.turn_on
+        target:
+          entity_id: light.led_pixel_stripe_control
+        data:
+          effect: Time
+          brightness_pct: 20
 ```
