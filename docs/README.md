@@ -2,7 +2,7 @@
 
 ### How to integrate into HomeAssistant
 
-When this external component is compiled and uploaded to the esp32 module you hopefully get a message on your Hoeassistant instance about a new ESPHome device detectet. Allow to import it. The device page will show up as follows.
+When this external component is compiled and uploaded to the esp32 module you hopefully get a message on your Hoeassistant instance about a new ESPHome device detected. Allow to import it. The device page will show up as followed example:
 
 ![this is what you get](default_view.png)
 
@@ -26,6 +26,35 @@ When this external component is compiled and uploaded to the esp32 module you ho
   exlusive for the Time and Time & Date effect
   Same styles as selectable in the iPixel Color App 
 
+- **Control** (rgb light)   
+  First of all you can switch on and off the display;)
+  Cliking on the text "Display" will open the rgb light dialog (see next chapter)
+
+  Effects:
+  - **None** calls the clear() method which shows the inintial image of the device  
+  - **Time** displays an internal clock frame  
+  - **Time & Date** display alternating clock and date  
+  - **Message** display text  
+  - **Load Image** select the source via the Image Slot slider
+  - **Fill Color** fills the entire display with the current color  
+  - **Fill Rainbow** loads an image with diagonal rainbow colors  
+  - **Rhythm Animation** set the style via the Image Slot slider
+  - **Rhythm Levels** set the style via the Image Slot slider  
+  - **Random Pixels** calls the setPixel() method with random coordinates and colors every 300ms  
+  - **Alarm** changes brightness in a falling ramp every 300ms  
+
+- **Font Flag** (number 1-4, default: 0)  
+  exlusive for the Message effect
+  
+  0:  8x16 Font   
+  1: 16x16 Font   
+  2: 16x32 Font (not available for display height below 32)  
+  3:  8x16 Font (encoded with width and height parameters per char, not compatible with my display)   
+  4: 16x32 Font (encoded with width and height parameters per char, not compatible with my display)   
+
+- **Text or Image URL** (text input)   
+  for selecting lambda, image slots or rhythm modes
+
 - **Text or Image URL** (text input)   
   text input for the Message effect and loading images.
   this input has some features by seaching for an extension (usefull for scripting):
@@ -41,45 +70,21 @@ When this external component is compiled and uploaded to the esp32 module you ho
   - '.lst' the preceding list of space separated mumbers sets the slots for the program feature
   - '.del' the preceding list of space separated mumbers sets the slots to be cleared
 
-- **Program List**
-  The switch returns to off as log ther has no program list has been set before (e.g. "1 2 3.lst).
-  if there is valid program list available set the switch to on and provide the animations to be loaded to the program slots
-  until the Proram Slot sensor shows 0 again. 
-  Example: key in into the Text or Image URL field
-    <URL>.gif<return> loads a gif image
-    This text shall follow the animation.<return>
-    And now the porgram is at its end.<return>
-  Now the Programm feature displays all provided commands in a sequence. The program will be stpped on anything loaded to slot 0 afterwards.
+- **Program List**  
+  The switch returns to off as long there has no program list has been set before (e.g. "1 2 3.lst).
+  If there is valid program list available, set the switch to on and provide the animations and/or texts to be loaded to the program slots
+  until the Program Slot sensor shows 0 again.\
+
+  Example: key in into the Text or Image URL field\
+  - 1 2 3.lst\<return\>
+  - turn on the Program List switch
+  - \<URL\>.gif\<return\> loads a gif image
+  - This text shall follow the animation.\<return\>
+  - And now the porgram is at its end.\<return\>
+  Now the Programm feature displays all commands provided in the sequence. The program will be stpped on anything loaded to slot 0 afterwards.
   This may be selecting control light effects or keying in other commands. 
 
-- **Control** (rgb light)   
-  First of all you can switch on and off the display;)
-  Cliking on the text "Display" will open the rgb light dialog (see next chapter)
-
-  Effects:
-  - **None** calls the clear() method which shows the inintial image of the device  
-  - **Time** displays an internal clock frame  
-  - **Time & Date** display alternating clock and date  
-  - **Message** display text  
-  - **Load Image** select the source via the Image Slot slider
-  - **Fill Color** fills the entire display with the current color  
-  - **Fill Rainbow** loads an image with diagonal rainbow colors  
-  - **Rhythn Animation** set the style via the Image Slot slider
-  - **Rhythm Levels** set the style via the Image Slot slider  
-  - **Random Pixel** calls the setPixel() method with random coordinates and colors every 300ms  
-  - **Alarm** changes brightness in a falling ramp every 300ms  
-
-- **Font Flag** (number 1-4, default: 0)  
-  exlusive for the Message effect
-  
-  0:  8x16 Font  
-  0:  8x16 Font   
-  1: 16x16 Font   
-  2: 16x32 Font   
-  3:  8x16 Font (encoded with width and height parameters per char, not compatible with my display)   
-  4: 16x32 Font (encoded with width and height parameters per char, not compatible with my display)   
-
-- **Text Mode** (number 0-4, default: 0)
+- **Text Mode** (number 0-9, default: 0)
   exlusive for the Message effect
   
   0: text color taken from the rgb light color   
@@ -99,14 +104,15 @@ Click on the text "Control" of the RGB light component to open detailed settings
 
 ![RGB light dialog](effect_view.png)
 
-### HomeAssistant scripting
+### HomeAssistant automation and script examples
 
-You can put images to the /config/www folder and access them via the URL http://<HA IP>:8123/local/...  
+You can put images to the HomeAssistant /config/www folder and access them via the URL http://\<HomeAssistant IP\>:8123/local/... 
 
-Example for an animation:
+Example for an automation:
 ```
 alias: LED Pixel Stripe Meldung
 description: ""
+mode: single
 triggers:
   - trigger: state
     entity_id:
@@ -117,7 +123,6 @@ actions:
     data:
       message: "{{ states('input_text.meldung') | string }}"
       url: http://192.168.0.254:8123/local/images/64x20/gif/animated/tetris2.gif
-mode: single
 ```
 
 Example for displaying a program list script:
