@@ -52,7 +52,7 @@ When this external component is compiled and uploaded to the esp32 module you ho
   3:  8x16 Font (encoded with width and height parameters per char, not compatible with my display)   
   4: 16x32 Font (encoded with width and height parameters per char, not compatible with my display)   
 
-- **Text or Image URL** (text input)   
+- **Image Slot** (number 0-15)   
   for selecting lambda, image slots or rhythm modes
 
 - **Text or Image URL** (text input)   
@@ -72,19 +72,18 @@ When this external component is compiled and uploaded to the esp32 module you ho
 
 - **Program List**  
   The switch returns to off as long there has no program list has been set before (e.g. "1 2 3.lst).
-  If there is valid program list available, set the switch to on and provide the animations and/or texts to be loaded to the program slots
-  until the Program Slot sensor shows 0 again.\
+  If there is valid program list available, set the switch to on and provide the animations and/or texts to be loaded to the program slots until the Program Slot sensor shows 0 again.
 
-  Example: key in into the Text or Image URL field\
+  Example: key in into the Text or Image URL field
   - 1 2 3.lst\<return\>
   - turn on the Program List switch
-  - \<URL\>.gif\<return\> loads a gif image
+  - http(s)://\<URL\>.gif\<return\> loads a gif image
   - This text shall follow the animation.\<return\>
-  - And now the porgram is at its end.\<return\>
+  - And now the program ends.\<return\>
   Now the Programm feature displays all commands provided in the sequence. The program will be stpped on anything loaded to slot 0 afterwards.
   This may be selecting control light effects or keying in other commands. 
 
-- **Text Mode** (number 0-9, default: 0)
+- **Text Mode** (number 0-9, default: 0)   
   exlusive for the Message effect
   
   0: text color taken from the rgb light color   
@@ -93,7 +92,7 @@ When this external component is compiled and uploaded to the esp32 module you ho
   3: top to bottom rainbow effect (light blue to white)   
   4: top to bottom rainbow effect (blue to yellow)   
   
-- **Update Time**
+- **Update Time**   
   Usually the internal clock of the display gets synchronized every hour by this device based on the homaassistant time (requires ipixel-ble.yaml time entry at the end of the file). If, for what reasons ever, the time is not up to date press this button. If it is still not correct soemting is wrong with your Homeassistant time. 
  
 ### The display rgb light component explained
@@ -110,35 +109,35 @@ You can put images to the HomeAssistant /config/www folder and access them via t
 
 Example for an automation:
 ```
-alias: LED Pixel Stripe Meldung
-description: ""
+alias: LED Pixel Stripe Message
+description: "show message when the text helper changes"
 mode: single
 triggers:
   - trigger: state
     entity_id:
-      - input_text.meldung
+      - input_text.message
 conditions: []
 actions:
   - action: script.led_pixel_stripe
     data:
-      message: "{{ states('input_text.meldung') | string }}"
+      message: "{{ states('input_text.message') | string }}"
       url: http://192.168.0.254:8123/local/images/64x20/gif/animated/tetris2.gif
 ```
 
-Example for displaying a program list script:
+Example script for displaying a program list:
 ```
 alias: LED Pixel Stripe
-description: Meldung auf LED Pixel Stripe ausgeben
+description: "show mwssage on LED Pixel Stripe"
 mode: single
 fields:
   message:
-    name: Meldung
+    name: Message
     description: message to display
     selector:
       text: null
     default: ""
   url:
-    name: Bild
+    name: Image URL
     description: image to display
     selector:
       text: null
