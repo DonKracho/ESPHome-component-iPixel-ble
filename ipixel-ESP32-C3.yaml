@@ -22,7 +22,7 @@ esp32:
 logger:
   baud_rate: 115200
   hardware_uart: UART0
-  level: debug
+  level: info
 
 # Enable Home Assistant API
 api:
@@ -38,7 +38,7 @@ wifi:
   password: !secret wifi_password
 
 external_components:
-  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices/tree/main/components[@ESP23-C3]
+  - source: github://DonKracho/ESPHome-component-iPixel-ble/components[@ESP23-C3]
     refresh: 0s
     components: [ipixel_ble]
 

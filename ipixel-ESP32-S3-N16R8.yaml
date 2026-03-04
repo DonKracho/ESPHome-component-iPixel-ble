@@ -1,10 +1,13 @@
 substitutions:
+  device_name: ipixel-stripe
+  friendly_name: LED Pixel Stripe
   image_resolution: 32x32
+  #image_resolution: 64x20
   #image_resolution: 96x16
 
 esphome:
-  name: ipixel-stripe
-  friendly_name: LED Pixel Stripe
+  name: $device_name
+  friendly_name: $friendly_name
   platformio_options: 
     build_flags: -D HAS_PSRAM
   on_boot:
@@ -52,6 +55,11 @@ wifi:
     - delay: 1000ms
     - component.update: bmp_image_id
 
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: $friendly_name
+    password: !secret hotspot_password
+
 # In combination with the `ap` this allows the user
 # to provision wifi credentials to the device via WiFi AP.
 captive_portal:
@@ -61,8 +69,8 @@ web_server:
   port: 80
 
 external_components:
-  - source: github://DonKracho/ESPHome-external-component-for-iPixel-ble-devices/components[@main]
-  #- source: D:\ESPHome-external-component-for-iPixel-ble-devices\components
+  - source: github://DonKracho/ESPHome-component-iPixel-ble/components[@main]
+  #- source: D:\ESPHome-component-iPixel-ble\components
     refresh: 0s
     components: [ipixel_ble]
 
@@ -169,7 +177,7 @@ light:
     num_leds: 1
     name: "Onboard LED"
     default_transition_length: 0s
-    #internal: true
+    internal: true
   - platform: ipixel_ble
     id: control_id
     name: Control

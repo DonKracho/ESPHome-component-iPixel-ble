@@ -4,7 +4,7 @@
 
 <img src="docs/LEDPixelBoard.jpg" alt="LED Pixel Board" width="600">
 
-This repository contains an ESPHome external component that enables control of a Bluetooth‐enabled iPixel display. It is non intrusive, means no modification of the display is required. It just emulates the known iPixel Color App commands. At least ESPHome version 2025.11.0 is required.
+This repository contains an ESPHome external component that provides control of a Bluetooth‐enabled iPixel display. It is non intrusive, means no modification of the display is required. It just emulates the known iPixel Color App commands. At least ESPHome version 2025.11.0 is required.
 
 ## Update 2026/03/03
 Verified the 64x20 iPixed LED Stripe to be supported. Updated HomeAssistant automation and script [examples](./docs/README.md). Fixed a program list error, where a gif immage loaded is larger than 12 KB.
@@ -17,7 +17,7 @@ cleaned up logging, updated [iPixel command documentation](./docs/IPIXEL_COMMAND
 Now it is possible to load online gif files. The native gif support of the device is used. I tested animated gif files up to a size of 500KB. Be aware, that 'large' files may take in minute range to load. Gif animations up to size of 32KB will load in a reasonable time. The native GIF and PNG support of the display has the disadvantage, that the image dimensions have to match the display size. 
 
 ## Update 2025/17/12
-code cleanup and support of Program List feature
+code cleanup and support of Program List feature.
 
 ## Update 2025/10/12
 Using an ESP32-S3-N16R8 module now online PNG, JPG and BMP files can be loaded and displayed. Just switch to te Load Image effect and copy the URL of an online image into the data text field. The images get resized to 32x32. Due to the limited resources even of an ESP32-S3 it is recommended to use small images only. This will keep loading times short and prevents the module from running out of memory or crashing in worst case.
@@ -41,7 +41,7 @@ Using an ESP32-S3-N16R8 module now online PNG, JPG and BMP files can be loaded a
 
 
 ## **Disclaimer**
-This is work in progress. Because everytrhing is working I wanted to use, I will not spend a lot of time for this repository now. Feel free to contribute or fork.
+This is work in progress. Because everytrhing is working what I wanted to use, I will not spend a lot of time for this repository anymore. Feel free to contribute or fork.
 
 ## Part One: Why?
 I purchased a 32x32 LED Pixel Board fom Action in Germany. I wanted to integrate it in HomeAssistant via ESPHome.
@@ -60,15 +60,16 @@ Definitely the App only. The App is quite complpex providing several image datab
 
 ## Part Two: Hasn’t This Been Done Already?
 
-Many have requested to control these devices, but none of the available solutions met my specific needs:
+Many have requested to control these devices, but none of the available solutions did solve my specific needs:
 - My main usage of the display will be a nerdy clock visualization provided by the display firmware itself.
 - Synchronizing the time without having to use the app.
 - Enabled to intergrate with HomeAssistant / ESPhome.
+- My HomeAssistant instance runs on PC hardware not in BLE range of the display. 
 - Send a text message from HomeAssistant automations.
 - The existing approaches did not show text and images on my specific 32x32 device.
 - Cheap (using an ESP32-C3 Super Lite module about 3$).
 - So far my Python knowledge is limited. I wanted to use my C++ skills.
-- Get rid of any Arduino framewort stuff, because in 2026 ESPHome will support the esp-idf only.
+- Get rid of any Arduino framework stuff, because in 2026 ESPHome will support the esp-idf only.
 
 Fortunately some smart people already investigated into this type of display controlled with the IPixel Color App
 and figured out most of the BLE protocol required.
@@ -116,7 +117,7 @@ I did some BLE sniffig and figured out that the 32x32 display does support monos
 - Ensure extensibility: The component is designed to support other versions of the display too.
 
 ### Key Insights
-One major discovery is that no single protocol exists for communicating with all BLE-enabled controllers. Most existing documentation and repositories focus on one. But at least other do exist the iPixel Color app is aware of only by evaluating firmware versions and display size. It requires people who own these devices, especially the none working, to do some debugging.
+One major discovery is that no single protocol exists for communicating with all BLE-enabled iPixel displays. Most existing documentation and repositories did focus on one. But at least other do exist the iPixel Color app is aware of only by evaluating firmware versions and display size. It requires people who own these devices, especially the none working, to do some debugging.
 
 ### Framework Selection
 The BLE stack occupies a significant amount of flash memory. Combined with several sensors, buttons, and other components, this quickly exceeds the 4MB flash capacity (2MB App, 2MB OTA) of an ESP32-C3 Super Lite module. I found that the ESP-IDF framework produces a smaller binary compared to the Arduino framework. Announced for 2026 ESPHome will support the ESP-IDF only! Therefore it is strongly recommended to use it right now. (The major difference is using the ESP_LOGx macros instead of Arduino-Sprintf and std::strings instead of Arduino-String)
@@ -135,6 +136,9 @@ The BLE stack occupies a significant amount of flash memory. Combined with sever
 
 - **GIF animations for the extreme landspape formats**  
   GIF animations for the 64x20 and 96x16 displays are hard to find. Would be nice to get them fron the iPixel Color app.
+
+- **BLE scan for devices to be able to select a display**
+  This will be usefull if there is more than one display in range.  
 
 ## Example of usage - HomeAssistant notifies about garbage collection dates
 [![watch the video](https://img.youtube.com/vi/Ii7i_Xsk9Vw/0.jpg)](https://youtu.be/Ii7i_Xsk9Vw)
