@@ -294,7 +294,11 @@ void IPixelBLE::on_notification_received(const std::vector<uint8_t> &data) {
 }
 
 void IPixelBLE::write_state(light::LightState *state) {
+  #if ESPHOME_VERSION_CODE >= VERSION_CODE(2026, 0, 0) // wtf! public function return has changed
+  if (!state->get_effect_name().str().compare("None")) {
+  #else
   if (!state->get_effect_name().compare("None")) {
+  #endif
     state_.effect_ = None;
   }
   float fbrightness, fred,  fgreen, fblue;
@@ -344,9 +348,7 @@ void IPixelBLE::write_state(light::LightState *state) {
   }
   
   if ((state_.mEffect != state_.effect_ || color_changed) && !is_starting()) {
-    if (play_switch_ != nullptr && play_switch_->state) {
-      on_play_switch(false);
-    }
+    on_play_switch(false);
     if (state_.mEffect == RhythmAnimation || state_.mEffect == RhythmLevels || state_.mEffect == RandomPixels) {
        is_ready_ = true;
        upload_queue_->publish_state(0);
@@ -576,9 +578,8 @@ void IPixelBLE::on_update_time_button_press() {
 }
 
 void IPixelBLE::on_play_switch(bool state) {
-  state_.mPlayState = state;
   // check if a list is avalable
-  state_.mPlayState = (get_slot(false) > 0) ? true : false;
+  state_.mPlayState = (get_slot(false) > 0) ? state : false;
 
   // update switch state and send playlist command
   if (play_switch_ != nullptr && play_switch_->state != state_.mPlayState) {
