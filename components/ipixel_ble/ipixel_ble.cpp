@@ -578,8 +578,9 @@ void IPixelBLE::on_update_time_button_press() {
 }
 
 void IPixelBLE::on_play_switch(bool state) {
+  state_.mPlayState = state;  // get_slot() requires state_.mPlayState to be true
   // check if a list is avalable
-  state_.mPlayState = (get_slot(false) > 0) ? state : false;
+  state_.mPlayState = (get_slot(false) > 0) ? state : false;  // validate state of switch
 
   // update switch state and send playlist command
   if (play_switch_ != nullptr && play_switch_->state != state_.mPlayState) {
