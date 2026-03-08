@@ -742,9 +742,10 @@ void IPixelBLE::set_background_color(std::string slot_csv) {
 }
 
 void IPixelBLE::set_program_list(std::string slot_csv) {
+  del_program_list(slot_csv); // delete programm list before reprogramming 
+
   std::stringstream ss(slot_csv);
   unsigned int number;
-  state_.mProgramSlots.clear();
 
   while(ss >> number) {
     if (number > 0 && number <= 100)
@@ -758,6 +759,7 @@ void IPixelBLE::set_program_list(std::string slot_csv) {
 }
 
 void IPixelBLE::del_program_list(std::string slot_csv) {
+  on_play_switch(false); // avoid crashes of display when deleting active slots
   std::stringstream ss(slot_csv);
   unsigned int number;
   std::vector<uint8_t> slot_list;
@@ -772,6 +774,8 @@ void IPixelBLE::del_program_list(std::string slot_csv) {
   } else {
     queuePush( iPixelCommads::clear() );
   }
+
+  state_.mProgramSlots.clear();
 }
 
 uint8_t IPixelBLE::get_slot(bool countdown) {
@@ -805,16 +809,15 @@ bool IPixelBLE::is_starting() {
 
 void IPixelBLE::downloadTick() {
 #ifdef HAS_PSRAM
-  static uint8_t slot = 0;
-  if (buffer_.is_valid() && upload_queue_->state == 0) {
+  if (buffer_.is_valid() && upload_queue_->state > 0) {
     uint8_t index;
     const std::vector<uint8_t> data = buffer_.get_chunk(index);
-    if (index == 0) {
-      slot = get_slot();
-    }
     if (data.size() > 0) {
-      upload_queue_->publish_state(1);
-      queuePush( iPixelCommads::showImage(data, slot, index, true, buffer_.get_size(), buffer_.get_crc()) );
+      //upload_queue_->publish_state(1);
+      queuePush( iPixelCommads::showImage(data, get_slot(false), index, true, buffer_.get_size(), buffer_.get_crc()) );
+    }
+    else {
+      get_slot();
     }
   }
 #endif
@@ -836,7 +839,7 @@ void IPixelBLE::load_image_url(std::string url) {
         buffer_.set_size(buffer_.downloader_->content_length);
       }
     }
-    upload_queue_->publish_state(0);
+    upload_queue_->publish_state(1);
   }
 #else
   ESP_LOGE(TAG, "requires build_flag: -D HAS_PSRAM");

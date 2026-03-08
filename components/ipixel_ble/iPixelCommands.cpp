@@ -200,7 +200,7 @@ namespace iPixelCommads {
         std::vector<uint8_t> chars_bytes;
         Helpers::encodeText(text, font_flag, txt_color.r, txt_color.g, txt_color.b, length, chars_bytes);
 
-        ESP_LOGI(TAG, "sendText %s length=%d", text.c_str(), length);
+        ESP_LOGI(TAG, "showText %s length=%d slot=%d", text.c_str(), length, save_slot);
 
         // --- Validation ---
         if (length == 0 || length > 500 || font_flag > 4) return {};
@@ -260,6 +260,8 @@ namespace iPixelCommads {
         if (size == 0 || size > max_size) return result;
 
         if (total_size == 0L) total_size = size;
+
+        ESP_LOGI(TAG, "showImage size=%d total=%d slot=%d", size, total_size, save_slot);
 
         std::vector<uint8_t> size_cmd = Helpers::getLittleEndian(size + 15, 2);     // 4 bytes little-endian (header + payload)
         std::vector<uint8_t> size_payl = Helpers::getLittleEndian(total_size, 4);   // 4 bytes little-endian
