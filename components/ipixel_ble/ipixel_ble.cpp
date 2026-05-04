@@ -830,7 +830,7 @@ void IPixelBLE::load_image_url(std::string url) {
   if ( http_request_ != nullptr) {
     std::string body;
     std::list<http_request::Header> request_headers;
-    std::set<std::string> collect_headers;
+    std::vector<std::string> collect_headers;  // Changed from std::set to std::vector, should fix compilation errs.
     
     buffer_.downloader_ = http_request_->get(url, request_headers, collect_headers);
     if (buffer_.downloader_ != nullptr) {
