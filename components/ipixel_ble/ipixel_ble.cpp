@@ -564,7 +564,7 @@ void IPixelBLE::on_update_time_button_press() {
     char strftime_buf[64];
     struct tm timeinfo;
 
-    time(&now);
+    std::time(&now);
     // Set timezone to Europe Standard Time
     setenv("TZ", "CST-1", 1);
     tzset();
@@ -608,7 +608,7 @@ void IPixelBLE::time_date_effect() {
     time_t now;
     struct tm timeinfo;
 
-    time(&now);
+    std::time(&now);
     localtime_r(&now, &timeinfo);
     int wday = timeinfo.tm_wday == 0 ? 7 : timeinfo.tm_wday;  // 1 to 7 where 7 is sunday
     queuePush( iPixelCommads::showClock(state_.mClockStyle, wday, timeinfo.tm_year - 100, timeinfo.tm_mon + 1, timeinfo.tm_mday, state_.mShowDate, true) );
@@ -830,7 +830,7 @@ void IPixelBLE::load_image_url(std::string url) {
   if ( http_request_ != nullptr) {
     std::string body;
     std::list<http_request::Header> request_headers;
-    std::set<std::string> collect_headers;
+    std::vector<std::string> collect_headers;  // Changed from std::set to std::vector, should fix compilation errs.
     
     buffer_.downloader_ = http_request_->get(url, request_headers, collect_headers);
     if (buffer_.downloader_ != nullptr) {
