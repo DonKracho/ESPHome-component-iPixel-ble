@@ -56,7 +56,7 @@ The display is controlled by the iPixel Color App via bluetooth
 ```
 
 ### Is there a one for all solution?
-Definitely the App only. The App is quite complpex providing several image databases and a drawing interface that will not fit into a cheap micro controller.
+Definitely the App only. The App is quite complex providing several image databases and a drawing interface that will not fit into a cheap micro controller.
 
 ## Part Two: Hasn’t This Been Done Already?
 
