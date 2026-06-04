@@ -8,6 +8,7 @@ from esphome.const import CONF_ID
 
 CODEOWNERS = ["@donkracho"]
 DEPENDENCIES = ["http_request"]
+AUTO_LOAD = ["display"]
 
 ESPHOME_MIN_VERSION = "2025.11.0"
 CONF_IPIXEL_BLE = "ipixel_ble"
