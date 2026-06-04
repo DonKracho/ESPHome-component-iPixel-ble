@@ -21,6 +21,10 @@
 #include "esp_heap_caps.h"
 #include "helpers.h"
 #include "state.h"
+// Base http_request type (HttpRequestComponent) — needed unconditionally so
+// set_parent() exists even on non-PSRAM builds. The codegen always emits a
+// set_parent() call; the actual download path stays gated behind HAS_PSRAM.
+#include "esphome/components/http_request/http_request.h"
 
 #ifdef HAS_PSRAM
 #include "esphome/components/http_request/http_request_idf.h"
@@ -197,10 +201,13 @@ public:
   void del_program_list(std::string slot_csv);
   void load_image_url(std::string url);
 
+  // http request — always defined so the codegen-emitted set_parent() call
+  // compiles on non-PSRAM boards; the parent is only stored/used with PSRAM.
+  void set_parent(http_request::HttpRequestComponent *parent) {
   #ifdef HAS_PSRAM
-  // http request
-  void set_parent(http_request::HttpRequestComponent *parent) { http_request_ = parent; }
+    http_request_ = parent;
   #endif
+  }
 
   // display
   //void update() override;
