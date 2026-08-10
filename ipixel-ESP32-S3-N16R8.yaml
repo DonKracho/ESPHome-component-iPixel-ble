@@ -281,7 +281,7 @@ number:
       id: animation_speed
       icon: mdi:play-speed
     clock_style:
-      name: "Clock style"
+      name: "Clock Style"
       id: clock_style
       icon: mdi:clock-digital
     font_flag:
