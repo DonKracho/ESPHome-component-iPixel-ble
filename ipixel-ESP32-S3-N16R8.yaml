@@ -354,6 +354,8 @@ time:
     id: homeassistant_time
 
 http_request:
+  # [Optional] When using self-signed certificates, uncomment the next line and supply the path to your root CA cert (located in esphome).
+  #ca_certificate_path: CA.crt
 
 online_image: #https://icon-icons.com/
   - id: png_image_id
