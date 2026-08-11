@@ -91,7 +91,8 @@ esp32_ble_tracker:
 ble_client:
   id: ble_client_id
   # put the BLE MAC address of your device here
-  mac_address: 0F:D6:54:F9:D2:C7  # 32x32
+  #mac_address: 0F:D6:54:F9:D2:C7  # 32x32
+  mac_address: 67:E0:13:D2:0A:DF  # 64x20
   #mac_address: C3:AD:E7:8A:97:CA  # 96x16
 
 ipixel_ble:
