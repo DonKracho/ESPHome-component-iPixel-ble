@@ -13,10 +13,12 @@ esphome:
   on_boot:
     priority: 200  
     then:
-      - wait_until:  
-          condition:
-            wifi.connected: 
-          timeout: 5s
+#      - wait_until:  
+#          condition:
+#            wifi.connected: 
+#          timeout: 5s
+      - wait_until:
+          lambda: 'return id(homeassistant_time).now().is_valid();'
 
 esp32:
   variant: esp32s3
