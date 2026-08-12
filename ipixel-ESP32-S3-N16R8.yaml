@@ -103,7 +103,7 @@ display:
     rotation: 0
     #width: 32   # use a fixed value if device recognition fails
     #height: 32  # use a fixed value if device recognition fails
-    update_interval: never
+    #update_interval: never
     lambda: |-
           auto red = Color(255, 0, 0);
           auto green = Color(0, 255, 0);
@@ -317,7 +317,7 @@ text:
     initial_value: "Überall dieselbe alte Leier. Das Layout ist fertig, der Text lässt auf sich warten. Damit das Layout nun nicht nackt im Raume steht und sich klein und leer vorkommt, springe ich ein: der Blindtext. Genau zu diesem Zwecke erschaffen, immer im Schatten."
     optimistic: true
     icon: "mdi:keyboard-settings-outline"
-    update_interval: never
+    #update_interval: never
     on_value:
       - lambda: |-
           id(upload_queue).publish_state(1);
