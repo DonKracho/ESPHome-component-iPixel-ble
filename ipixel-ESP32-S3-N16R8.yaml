@@ -8,7 +8,6 @@ substitutions:
 esphome:
   name: $device_name
   friendly_name: $friendly_name
-#  platformio_options: 
   build_flags: -D HAS_PSRAM
   on_boot:
     priority: 200  
