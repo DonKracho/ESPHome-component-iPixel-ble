@@ -70,7 +70,7 @@ web_server:
 external_components:
   #- source: github://DonKracho/ESPHome-component-iPixel-ble/components[@main]
   - source: D:\ESPHome-component-iPixel-ble\components
-    refresh: 0s
+    refresh: 60s
     components: [ipixel_ble]
 
 # Include custom fonts
@@ -176,12 +176,12 @@ light:
     pin: GPIO48
     num_leds: 1
     name: "Onboard LED"
-    default_transition_length: 0s
+    default_transition_length: 1s
     internal: true
   - platform: ipixel_ble
     id: control_id
     name: Control
-    default_transition_length: 0s
+    default_transition_length: 1s
     initial_state:
       state: ON
     restore_mode: RESTORE_AND_ON
