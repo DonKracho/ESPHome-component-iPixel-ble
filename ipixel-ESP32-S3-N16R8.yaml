@@ -341,7 +341,7 @@ text:
           } else if (x.rfind(".del") != std::string::npos) {
             id(ipixel_ble_id).del_program_list(x.substr(0, x.size() - 4));
           } else if (x.rfind(".img") != std::string::npos) {
-            uint8_t number = std::stoi(x.substr(0, x.size() - 4));
+            int8_t number = std::stoi(x.substr(0, x.size() - 4));
             if (number >= 0 && number <= 15) id(ipixel_ble_id).show_image(number);
           } else {
             ESP_LOGD("text_id", "no image extention found, setting text");
