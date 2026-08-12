@@ -8,17 +8,15 @@ substitutions:
 esphome:
   name: $device_name
   friendly_name: $friendly_name
-  platformio_options: 
-    build_flags: -D HAS_PSRAM
+#  platformio_options: 
+  build_flags: -D HAS_PSRAM
   on_boot:
     priority: 200  
     then:
-#      - wait_until:  
-#          condition:
-#            wifi.connected: 
-#          timeout: 5s
       - wait_until:
-          lambda: 'return id(homeassistant_time).now().is_valid();'
+          condition:
+            lambda: 'return id(homeassistant_time).now().is_valid();'
+          timeout: 10s
 
 esp32:
   variant: esp32s3
