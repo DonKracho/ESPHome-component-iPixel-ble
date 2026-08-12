@@ -404,11 +404,11 @@ void IPixelBLE::write_state(light::LightState *state) {
 
 void IPixelBLE::update_state_(const DeviceState &new_state) {
   // numbers
-  if (annimation_mode_number_ != nullptr && annimation_mode_number_->state != new_state.mAnimationMode) {
-    annimation_mode_number_->publish_state(new_state.mAnimationMode);
+  if (animation_mode_number_ != nullptr && animation_mode_number_->state != new_state.mAnimationMode) {
+    animation_mode_number_->publish_state(new_state.mAnimationMode);
   }
-  if (annimation_speed_number_ != nullptr && annimation_speed_number_->state != new_state.mAnimationSpeed) {
-    annimation_speed_number_->publish_state(new_state.mAnimationSpeed);
+  if (animation_speed_number_ != nullptr && animation_speed_number_->state != new_state.mAnimationSpeed) {
+    animation_speed_number_->publish_state(new_state.mAnimationSpeed);
   }
   if (clock_style_number_ != nullptr && clock_style_number_->state != new_state.mClockStyle) {
     clock_style_number_->publish_state(new_state.mClockStyle);
@@ -485,7 +485,7 @@ bool IPixelBLE::queueTick() {
 
 void IPixelBLE::queuePush(std::vector<uint8_t> command) {
     uint32_t len = command.size();
-    ESP_LOGI(TAG, "cmd_len: %d", len);
+    ESP_LOGI(TAG, "cmd_len: %ld", len);
     if (len > 0) {
       queue_.push_back(command);
     }
@@ -510,12 +510,12 @@ void IPixelBLE::on_lambda_slot_number(float value) {
   }
 }
 
-void IPixelBLE::on_annimation_mode_number(float value) {
+void IPixelBLE::on_animation_mode_number(float value) {
   state_.mAnimationMode = value;
   if (!is_starting()) text_effect();
 }
 
-void IPixelBLE::on_annimation_speed_number(float value) {
+void IPixelBLE::on_animation_speed_number(float value) {
   state_.mAnimationSpeed = value;
   if (!is_starting()) text_effect();
 }
@@ -564,7 +564,7 @@ void IPixelBLE::on_update_time_button_press() {
     char strftime_buf[64];
     struct tm timeinfo;
 
-    time(&now);
+    std::time(&now);
     // Set timezone to Europe Standard Time
     setenv("TZ", "CST-1", 1);
     tzset();
@@ -608,7 +608,7 @@ void IPixelBLE::time_date_effect() {
     time_t now;
     struct tm timeinfo;
 
-    time(&now);
+    std::time(&now);
     localtime_r(&now, &timeinfo);
     int wday = timeinfo.tm_wday == 0 ? 7 : timeinfo.tm_wday;  // 1 to 7 where 7 is sunday
     queuePush( iPixelCommads::showClock(state_.mClockStyle, wday, timeinfo.tm_year - 100, timeinfo.tm_mon + 1, timeinfo.tm_mday, state_.mShowDate, true) );
@@ -829,12 +829,12 @@ void IPixelBLE::load_image_url(std::string url) {
   ESP_LOGI(TAG, "url=%s is_gif=%d", url.c_str(), is_gif);
   if ( http_request_ != nullptr) {
     std::string body;
-    std::list<http_request::Header> request_headers;
-    std::set<std::string> collect_headers;
+    std::vector<http_request::Header> request_headers;
+    std::vector<std::string> collect_headers;
     
     buffer_.downloader_ = http_request_->get(url, request_headers, collect_headers);
     if (buffer_.downloader_ != nullptr) {
-      ESP_LOGI(TAG, "downloader status=%d length=%d %dms", buffer_.downloader_->status_code, buffer_.downloader_->content_length, buffer_.downloader_->duration_ms);
+      ESP_LOGI(TAG, "downloader status=%d length=%d %ldms", buffer_.downloader_->status_code, buffer_.downloader_->content_length, buffer_.downloader_->duration_ms);
       if (buffer_.downloader_->status_code == http_request::HTTP_STATUS_OK) {
         buffer_.set_size(buffer_.downloader_->content_length);
       }

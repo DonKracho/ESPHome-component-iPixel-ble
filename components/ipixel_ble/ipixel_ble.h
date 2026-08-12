@@ -21,6 +21,10 @@
 #include "esp_heap_caps.h"
 #include "helpers.h"
 #include "state.h"
+// Base http_request type (HttpRequestComponent) — needed unconditionally so
+// set_parent() exists even on non-PSRAM builds. The codegen always emits a
+// set_parent() call; the actual download path stays gated behind HAS_PSRAM.
+#include "esphome/components/http_request/http_request.h"
 
 #ifdef HAS_PSRAM
 #include "esphome/components/http_request/http_request_idf.h"
@@ -197,10 +201,13 @@ public:
   void del_program_list(std::string slot_csv);
   void load_image_url(std::string url);
 
+  // http request — always defined so the codegen-emitted set_parent() call
+  // compiles on non-PSRAM boards; the parent is only stored/used with PSRAM.
+  void set_parent(http_request::HttpRequestComponent *parent) {
   #ifdef HAS_PSRAM
-  // http request
-  void set_parent(http_request::HttpRequestComponent *parent) { http_request_ = parent; }
+    http_request_ = parent;
   #endif
+  }
 
   // display
   //void update() override;
@@ -250,11 +257,11 @@ public:
   void set_lambda_slot_number(number::Number *number) { lambda_slot_number_ = number; }
   void on_lambda_slot_number(float value);
 
-  void set_annimation_mode_number(number::Number *number) { annimation_mode_number_ = number; }
-  void on_annimation_mode_number(float value);
+  void set_animation_mode_number(number::Number *number) { animation_mode_number_ = number; }
+  void on_animation_mode_number(float value);
 
-  void set_annimation_speed_number(number::Number *number) { annimation_speed_number_ = number; }
-  void on_annimation_speed_number(float value);
+  void set_animation_speed_number(number::Number *number) { animation_speed_number_ = number; }
+  void on_animation_speed_number(float value);
 
   void set_font_flag_number(number::Number *number) { font_flag_number_ = number; }
   void on_font_flag_number(float value);
@@ -334,8 +341,8 @@ protected:
 
   button::Button *update_time_button_{};
 
-  number::Number *annimation_mode_number_{};
-  number::Number *annimation_speed_number_{};
+  number::Number *animation_mode_number_{};
+  number::Number *animation_speed_number_{};
   number::Number *clock_style_number_{};
   number::Number *font_flag_number_{};
   number::Number *lambda_slot_number_{};

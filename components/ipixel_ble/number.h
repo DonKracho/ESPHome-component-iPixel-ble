@@ -24,20 +24,20 @@ class LambdaSlotNumber : public number::Number, public Parented<IPixelBLE> {
   void control(float value) override { this->parent_->on_lambda_slot_number(value); }
 };
 
-class AnnimationModeNumber : public number::Number, public Parented<IPixelBLE> {
+class AnimationModeNumber : public number::Number, public Parented<IPixelBLE> {
  public:
-  AnnimationModeNumber() = default;
+  AnimationModeNumber() = default;
 
  protected:
-  void control(float value) override { this->parent_->on_annimation_mode_number(value); }
+  void control(float value) override { this->parent_->on_animation_mode_number(value); }
 };
 
-class AnnimationSpeedNumber : public number::Number, public Parented<IPixelBLE> {
+class AnimationSpeedNumber : public number::Number, public Parented<IPixelBLE> {
  public:
-  AnnimationSpeedNumber() = default;
+  AnimationSpeedNumber() = default;
 
  protected:
-  void control(float value) override { this->parent_->on_annimation_speed_number(value); }
+  void control(float value) override { this->parent_->on_animation_speed_number(value); }
 };
 
 class FontFlagNumber : public number::Number, public Parented<IPixelBLE> {
