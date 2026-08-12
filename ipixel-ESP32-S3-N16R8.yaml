@@ -358,8 +358,9 @@ http_request:
   # [Optional] When using self-signed certificates, uncomment the next line and supply the path to your root CA cert (located in esphome).
   #ca_certificate_path: CA.crt
 
-online_image: #https://icon-icons.com/
-  - id: png_image_id
+image: #https://icon-icons.com/
+  - platform: online_image
+    id: png_image_id
     url: "https://raw.githubusercontent.com/DonKracho/ESPHome-external-component-for-iPixel-ble-devices/refs/heads/main/sample-images/32x32/png/earth.png"
     format: PNG
     type: RGB
@@ -368,7 +369,8 @@ online_image: #https://icon-icons.com/
     on_download_finished:
       - lambda: |-
           id(ipixel_ble_id).show_image(13);
-  - id: jpg_image_id
+  - platform: online_image
+    id: jpg_image_id
     url: "https://raw.githubusercontent.com/DonKracho/ESPHome-external-component-for-iPixel-ble-devices/refs/heads/main/sample-images/32x32/jpg/flower.jpg"
     format: JPEG
     type: RGB
@@ -377,7 +379,8 @@ online_image: #https://icon-icons.com/
     on_download_finished:
       - lambda: |-
           id(ipixel_ble_id).show_image(14);
-  - id: bmp_image_id
+  - platform: online_image
+    id: bmp_image_id
     url: "https://raw.githubusercontent.com/DonKracho/ESPHome-external-component-for-iPixel-ble-devices/refs/heads/main/sample-images/32x32/bmp/smiley-with-glasses-and-mustache.bmp"
     format: BMP
     type: RGB
