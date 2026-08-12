@@ -103,7 +103,7 @@ display:
     rotation: 0
     #width: 32   # use a fixed value if device recognition fails
     #height: 32  # use a fixed value if device recognition fails
-    #update_interval: never
+    update_interval: never
     lambda: |-
           auto red = Color(255, 0, 0);
           auto green = Color(0, 255, 0);
@@ -318,7 +318,7 @@ text:
     #initial_value: "Same old story everywhere. The layout is ready, but we'll have to wait for the text. In order to not leave the layout empty and alone, I step in: the placeholder text. Created for precisely this purpose, always in the shadows."
     optimistic: true
     icon: "mdi:keyboard-settings-outline"
-    #update_interval: never
+    update_interval: never
     on_value:
       - lambda: |-
           id(upload_queue).publish_state(1);
