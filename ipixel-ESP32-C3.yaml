@@ -1,17 +1,20 @@
 substitutions:
+  device_name: ipixel-ble
+  friendly_name: LED Pixel Board
   image_resolution: 32x32
-#  image_resolution: 96x16
+  #image_resolution: 64x20
+  #image_resolution: 96x16
 
 esphome:
-  name: ipixel-ble
-  friendly_name: LED Pixel Board
+  name: $device_name
+  friendly_name: $friendly_name
   on_boot:
     priority: 200  
     then:
-      - wait_until:  
+      - wait_until:
           condition:
-            wifi.connected: 
-          timeout: 5s
+            lambda: 'return id(homeassistant_time).now().is_valid();'
+          timeout: 10s
 
 esp32:
   board: esp32-c3-devkitm-1
