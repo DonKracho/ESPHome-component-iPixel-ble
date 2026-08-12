@@ -6,6 +6,10 @@
 
 This repository contains an ESPHome external component that provides control of a Bluetooth‐enabled iPixel display. It is non intrusive, means no modification of the display is required. It just emulates the known iPixel Color App commands. At least ESPHome version 2025.11.0 is required.
 
+## Update 2026/08/12
+Thank you for providing PRs. Fixed compiling errors and sdt::time automatically fixed the 1 h dst offset.  
+There are still warings about the update_interval, but 'never' was intended and is allowed according the documentation to minimize the ble traffic.
+ 
 ## Update 2026/03/03
 Verified the 64x20 iPixed LED Stripe to be supported. Updated HomeAssistant automation and script [examples](./docs/README.md). Fixed a program list error, where a gif immage loaded is larger than 12 KB.
 
